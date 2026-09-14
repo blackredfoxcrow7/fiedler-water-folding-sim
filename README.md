@@ -1,9 +1,10 @@
 # Graph-Spectral Protein Folding Simulator
 ### Forcefield-Free Peptide Self-Assembly via Laplacian Fiedler Vector Optimization ($\lambda_2$)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22743112.svg)](https://doi.org/10.5281/zenodo.22743112)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Paper](https://img.shields.io/badge/Paper-Markdown-green.svg)](paper_draft.md)
+[![Paper DOI](https://img.shields.io/badge/Paper-Zenodo--DOI-blue.svg)](https://doi.org/10.5281/zenodo.22743112)
 [![Author: Yoshihiro Honda](https://img.shields.io/badge/Author-Yoshihiro%20Honda-orange.svg)](#author)
 
 > **Can protein folding be simulated without calculating physical potential energy (AMBER/CHARMM forcefields)?**  
@@ -43,10 +44,11 @@
 
 ---
 
-## 📄 Academic Paper Draft
+## 📄 Official Published Manuscript (Zenodo DOI)
 
-The complete academic manuscript detailing the theory, algorithm proofs, and biophysical implications is available in this repository:
-* 📄 **[paper_draft.md](paper_draft.md)**: *"Graph-Spectral Protein Folding: Simulating Peptide Self-Assembly via Laplacian Fiedler Vector Optimization"*
+The complete academic manuscript detailing the theory, algorithm proofs, and biophysical implications is officially published on Zenodo:
+* 📄 **[Zenodo Paper Link](https://doi.org/10.5281/zenodo.22743112)**: *"Graph-Spectral Protein Folding: Simulating Peptide Self-Assembly via Laplacian Fiedler Vector Optimization"* (DOI: `10.5281/zenodo.22743112`)
+* 📄 **Local Repository Copy**: [paper_draft.md](paper_draft.md)
 
 ---
 
@@ -88,6 +90,7 @@ The repository includes a custom Three.js WebGL 3D viewer (`viewer.html`) that r
 **Yoshihiro Honda (本多 義弘)**  
 Independent Researcher, Japan  
 GitHub: [@blackredfoxcrow7](https://github.com/blackredfoxcrow7)  
+Publication DOI: [10.5281/zenodo.22743112](https://doi.org/10.5281/zenodo.22743112)  
 
 *Collaborative Research & AI Technical Assistance provided by Antigravity (Google DeepMind).*
 
@@ -101,9 +104,9 @@ If you find this work or algorithm useful in your research, please cite:
 @article{honda2026graphspectral,
   title={Graph-Spectral Protein Folding: Simulating Peptide Self-Assembly via Laplacian Fiedler Vector Optimization},
   author={Honda, Yoshihiro},
-  journal={bioRxiv / GitHub Repository},
+  journal={Zenodo},
   year={2026},
-  publisher={GitHub},
-  howpublished={\url{https://github.com/blackredfoxcrow7/fiedler-water-folding-sim}}
+  doi={10.5281/zenodo.22743112},
+  url={https://doi.org/10.5281/zenodo.22743112}
 }
 ```

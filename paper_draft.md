@@ -3,6 +3,7 @@
 **Author**: Yoshihiro Honda<sup>1,*</sup>  
 <sup>1</sup> Independent Researcher, Japan  
 <sup>*</sup> Corresponding author  
+**DOI**: [10.5281/zenodo.22743112](https://doi.org/10.5281/zenodo.22743112)  
 
 ---
 
