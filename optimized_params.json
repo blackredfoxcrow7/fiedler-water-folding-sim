@@ -1,0 +1,7 @@
+{
+    "bulkSolventStrength": 0.35,
+    "waterBeltContraction": 0.5,
+    "waterWaterStrength": 0.5,
+    "waterPeptideStrength": 0.6,
+    "watersPerAtom": 4
+}

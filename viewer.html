@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Molecular Folding & Polymer Dehydration Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Plotly CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #08080a;
+            --bg-card: rgba(18, 18, 24, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00ffd5;
+            --accent-magenta: #ff007f;
+            --accent-purple: #7d00ff;
+            --accent-green: #00ff66;
+            --text-main: #f3f3f7;
+            --text-muted: #9595a8;
+            --sidebar-width: 390px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            position: relative;
+            background-color: #000;
+        }
+
+        #plot-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Tabs Styling */
+        .tab-container {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Title */
+        h1 {
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Control Panel elements */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+        }
+
+        select {
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(0, 255, 213, 0.15);
+        }
+
+        /* Slider Controls */
+        .slider-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .slider-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Checkbox toggles */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .toggle-row input {
+            cursor: pointer;
+            accent-color: var(--accent-cyan);
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+        }
+
+        .stat-val {
+            font-family: 'Fira Code', monospace;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Mini Chart Panel */
+        .mini-chart-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+            height: 160px;
+        }
+
+        #mini-2d-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Legend Panel */
+        .legend-card {
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+
+        /* User Tip Overlays */
+        .overlay-tip {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(10, 10, 15, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer {
+            font-size: 9px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div>
+            <h1>Molecular Folding</h1>
+            <div class="tagline">Interactive 3D Dashboard</div>
+            
+            <!-- Dashboard Tab buttons -->
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="switchTab('polymer')">PNIPAM Polymers</button>
+                <button class="tab-btn" onclick="switchTab('peptide')">Peptides</button>
+            </div>
+            
+            <!-- Model Selection -->
+            <div class="control-group">
+                <label id="model-select-label">ポリマー系モデルの選択</label>
+                <select id="model-select" onchange="loadSelectedModel()"></select>
+            </div>
+            
+            <!-- Hydration Controls (Polymers Only) -->
+            <div class="control-group" id="hydration-controls">
+                <label>溶媒水分子数 (脱水スイープ)</label>
+                <div class="slider-box">
+                    <div class="slider-label-row">
+                        <span>多和 (湿潤)</span>
+                        <span id="water-val-display" style="color: var(--accent-cyan);">180 Waters</span>
+                        <span>無水 (乾燥)</span>
+                    </div>
+                    <input type="range" id="water-slider" min="0" max="5" value="0" step="1" oninput="changeHydrationScenario()">
+                    <div class="toggle-row">
+                        <input type="checkbox" id="show-water-cb" checked onchange="toggleWaterSolvent()">
+                        <label for="show-water-cb" style="display:inline; margin:0; text-transform:none; font-size:13px; color:var(--text-main); font-weight:normal;">溶媒水分子を表示する</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Real-time Statistics -->
+            <div class="stats-card">
+                <label>解析パラメーター</label>
+                <div id="stats-area"></div>
+            </div>
+
+            <!-- Synced 2D Transition Profile Chart (Polymers Only) -->
+            <div class="control-group" id="mini-chart-section">
+                <label>相転移プロファイル (Rg / λ2 スイープ同期)</label>
+                <div class="mini-chart-card">
+                    <div id="mini-2d-chart"></div>
+                </div>
+            </div>
+            
+            <!-- Dynamic Legend -->
+            <div class="legend-card" id="legend-area"></div>
+        </div>
+        
+        <div class="footer">
+            Differentiable Polymer Dynamics Engine &copy; 2026
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div id="plot-container"></div>
+        <div class="overlay-tip">
+            <span>🖱️ ドラッグで3D回転</span>
+            <span>|</span>
+            <span>🔍 スクロールでズーム</span>
+            <span>|</span>
+            <span>✋ 右ドラッグで平行移動</span>
+        </div>
+    </div>
+
+    <!-- Load compile_viewer_data.py compiled javascript data database -->
+    <script src="viewer_data.js"></script>
+    <script>
+        let currentTab = 'polymer';
+        let currentModel = '';
+        let currentScenarioKey = '180';
+        let showWater = true;
+        let pDataKeys = [];
+
+        // Color Palette for Atom Symbols
+        const atomColors = {
+            "C": "#a6a6b5", // Grey
+            "N": "#00d2ff", // Light Blue (Amide N)
+            "O": "#ff4d88", // Pink-Red (Amide O)
+            "H": "#ffffff", // White
+            "S": "#ffcc00", // Yellow
+            "W": "#00ffd5"  // Cyan for Water oxygen
+        };
+
+        function initDashboard() {
+            if (typeof VIEWER_DATA === 'undefined') {
+                document.getElementById('plot-container').innerHTML = `
+                    <div style="color:red; padding:40px; font-family:sans-serif; text-align:center;">
+                        <h2>データがロードできませんでした</h2>
+                        <p>viewer_data.js が存在することを確認してください。</p>
+                    </div>`;
+                return;
+            }
+            switchTab('polymer'); // Start with polymers tab
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Toggle active classes on tab buttons
+            const btns = document.querySelectorAll('.tab-btn');
+            btns[0].classList.toggle('active', tab === 'polymer');
+            btns[1].classList.toggle('active', tab === 'peptide');
+            
+            // Adjust sidebar controls visibility
+            const hydrationControls = document.getElementById('hydration-controls');
+            const miniChartSection = document.getElementById('mini-chart-section');
+            const selectLabel = document.getElementById('model-select-label');
+            
+            if (tab === 'peptide') {
+                hydrationControls.style.display = 'none';
+                miniChartSection.style.display = 'none';
+                selectLabel.innerText = 'ペプチドモデルの選択';
+            } else {
+                hydrationControls.style.display = 'block';
+                miniChartSection.style.display = 'block';
+                selectLabel.innerText = 'ポリマー系モデルの選択';
+            }
+            
+            // Re-populate select dropdown with corresponding models
+            const select = document.getElementById('model-select');
+            select.innerHTML = '';
+            
+            pDataKeys = Object.keys(VIEWER_DATA).filter(k => VIEWER_DATA[k].system_type === tab);
+            
+            pDataKeys.forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.innerText = k;
+                select.appendChild(opt);
+            });
+            
+            if (pDataKeys.length > 0) {
+                select.value = pDataKeys[0];
+                loadSelectedModel();
+            }
+        }
+
+        function loadSelectedModel() {
+            const select = document.getElementById('model-select');
+            currentModel = select.value;
+            const data = VIEWER_DATA[currentModel];
+            
+            if (!data) return;
+            
+            if (currentTab === 'polymer') {
+                // Populate hydration slider based on scenarios
+                const scenarioKeys = Object.keys(data.scenarios).sort((a, b) => parseInt(b) - parseInt(a)); // sort descending
+                const slider = document.getElementById('water-slider');
+                slider.max = scenarioKeys.length - 1;
+                slider.value = 0; // wet state first
+                currentScenarioKey = scenarioKeys[0];
+                
+                updateHydrationLabel();
+                buildMini2DChart();
+            }
+            
+            updatePlot();
+            updateLegend();
+        }
+
+        function changeHydrationScenario() {
+            const data = VIEWER_DATA[currentModel];
+            const scenarioKeys = Object.keys(data.scenarios).sort((a, b) => parseInt(b) - parseInt(a));
+            const sliderIdx = document.getElementById('water-slider').value;
+            currentScenarioKey = scenarioKeys[sliderIdx];
+            
+            updateHydrationLabel();
+            updatePlot();
+            updateMini2DChartIndicator();
+        }
+
+        function updateHydrationLabel() {
+            document.getElementById('water-val-display').innerText = `${currentScenarioKey} 水分子`;
+        }
+
+        function toggleWaterSolvent() {
+            showWater = document.getElementById('show-water-cb').checked;
+            updatePlot();
+        }
+
+        function updateLegend() {
+            const legendArea = document.getElementById('legend-area');
+            legendArea.innerHTML = '<label>凡例</label>';
+            
+            if (currentTab === 'peptide') {
+                legendArea.innerHTML += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #ff007f, #00d2ff);"></div>
+                        <span>Cα トレース (N末端 ➡ C末端)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="border:1px dashed var(--accent-cyan); background:transparent;"></div>
+                        <span>分子内水素結合</span>
+                    </div>
+                `;
+            } else {
+                legendArea.innerHTML += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: ${atomColors.C};"></div>
+                        <span>主鎖炭素 (Backbone C)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: ${atomColors.N};"></div>
+                        <span>アミド窒素/酸素 (Amide N/O)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: var(--accent-magenta);"></div>
+                        <span>疎水性炭素 (Isopropyl Methyl C)</span>
+                    </div>
+                `;
+                
+                // Add crosslinker or specific beads if available
+                if (currentModel.includes("Ring") || currentModel.includes("Branched")) {
+                    legendArea.innerHTML += `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: var(--accent-green); border:1px solid #fff;"></div>
+                            <span>MBAA 架橋点 (MBAA Linker C)</span>
+                        </div>
+                    `;
+                }
+                
+                legendArea.innerHTML += `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: ${atomColors.W}; opacity: 0.4;"></div>
+                        <span>溶媒水分子 (Water Solvent)</span>
+                    </div>
+                `;
+            }
+        }
+
+        // --- Plotly 3D Visualizer ---
+        function updatePlot() {
+            const data = VIEWER_DATA[currentModel];
+            if (!data) return;
+            
+            const plotContainer = document.getElementById('plot-container');
+            const statsArea = document.getElementById('stats-area');
+            
+            const traces = [];
+            
+            if (currentTab === 'peptide') {
+                // Peptide structure rendering
+                const coords = data.foldedCoords;
+                const atoms = data.atoms;
+                const residues = data.atomResidues;
+                
+                // Extract C-alpha trace
+                const caIndices = [];
+                const caLabels = [];
+                atoms.forEach((atom, idx) => {
+                    if (atom.symbol === 'CA') {
+                        caIndices.push(idx);
+                        caLabels.push(`${data.sequence[residues[idx]]}${residues[idx] + 1}`);
+                    }
+                });
+                
+                const caX = caIndices.map(idx => coords[idx][0]);
+                const caY = caIndices.map(idx => coords[idx][1]);
+                const caZ = caIndices.map(idx => coords[idx][2]);
+                
+                // 1. Draw ribbon path
+                traces.push({
+                    type: 'scatter3d',
+                    mode: 'lines+markers',
+                    x: caX,
+                    y: caY,
+                    z: caZ,
+                    text: caLabels,
+                    hoverinfo: 'text',
+                    line: {
+                        width: 8,
+                        color: caIndices.map((_, i) => i),
+                        colorscale: 'Viridis'
+                    },
+                    marker: {
+                        size: 8,
+                        color: caIndices.map((_, i) => i),
+                        colorscale: 'Viridis',
+                        line: { color: '#ffffff', width: 1.5 }
+                    },
+                    name: 'Cα Trace'
+                });
+                
+                // 2. Identify hydrogen bonds
+                const hBonds = [];
+                const oIndices = [];
+                const nIndices = [];
+                atoms.forEach((atom, idx) => {
+                    if (atom.symbol === 'O') oIndices.push(idx);
+                    if (atom.symbol === 'N') nIndices.push(idx);
+                });
+                
+                oIndices.forEach(oIdx => {
+                    nIndices.forEach(nIdx => {
+                        if (Math.abs(residues[oIdx] - residues[nIdx]) >= 3) {
+                            const d = Math.sqrt(
+                                Math.pow(coords[oIdx][0] - coords[nIdx][0], 2) +
+                                Math.pow(coords[oIdx][1] - coords[nIdx][1], 2) +
+                                Math.pow(coords[oIdx][2] - coords[nIdx][2], 2)
+                            );
+                            if (d < 4.5) {
+                                hBonds.push({ start: coords[oIdx], end: coords[nIdx] });
+                            }
+                        }
+                    });
+                });
+                
+                // Draw Hbonds as dashed lines
+                hBonds.forEach((bond, i) => {
+                    traces.push({
+                        type: 'scatter3d',
+                        mode: 'lines',
+                        x: [bond.start[0], bond.end[0]],
+                        y: [bond.start[1], bond.end[1]],
+                        z: [bond.start[2], bond.end[2]],
+                        line: { color: '#00ffd5', width: 4, dash: 'dash' },
+                        hoverinfo: 'none',
+                        showlegend: false
+                    });
+                });
+                
+                // Calculate Peptide Rg
+                let cx = 0, cy = 0, cz = 0;
+                coords.forEach(c => { cx += c[0]; cy += c[1]; cz += c[2]; });
+                cx /= coords.length; cy /= coords.length; cz /= coords.length;
+                let rgSq = 0;
+                coords.forEach(c => {
+                    rgSq += Math.pow(c[0] - cx, 2) + Math.pow(c[1] - cy, 2) + Math.pow(c[2] - cz, 2);
+                });
+                const rg = Math.sqrt(rgSq / coords.length);
+                
+                // Update stats HTML
+                statsArea.innerHTML = `
+                    <div class="stat-row">
+                        <span class="stat-label">アミノ酸配列</span>
+                        <span class="stat-val" style="color: var(--accent-magenta); font-size:12px;">${data.sequence}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">原子数 (全原子)</span>
+                        <span class="stat-val">${coords.length}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">慣性半径 (Rg)</span>
+                        <span class="stat-val" style="color: var(--accent-cyan);">${rg.toFixed(3)} Å</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">分子内水素結合数</span>
+                        <span class="stat-val" style="color: var(--accent-green);">${hBonds.length} 本</span>
+                    </div>
+                `;
+                
+                renderPlotly(traces, coords);
+                
+            } else {
+                // Polymer structure rendering
+                const scenario = data.scenarios[currentScenarioKey];
+                if (!scenario) return;
+                
+                const coords = scenario.coords;
+                const n_poly = data.n_poly;
+                const bonds = data.bonds;
+                const types = data.types;
+                const is_hydro = data.is_hydro_c;
+                
+                // 1. Separate polymer atoms
+                const polyCoords = coords.slice(0, n_poly);
+                
+                const bb_x = [], bb_y = [], bb_z = [];
+                const am_x = [], am_y = [], am_z = [];
+                const ip_x = [], ip_y = [], ip_z = [];
+                const link_x = [], link_y = [], link_z = [];
+                
+                for (let i = 0; i < n_poly; i++) {
+                    const c = polyCoords[i];
+                    // Identify Linkers (the very last polymer atom in ring, or last in branched)
+                    if ((currentModel.includes("Ring") && i === n_poly - 1) || 
+                        (currentModel.includes("Branched") && i === n_poly - 1)) {
+                        link_x.push(c[0]); link_y.push(c[1]); link_z.push(c[2]);
+                    } else if (types[i] === "O" || types[i] === "N") {
+                        am_x.push(c[0]); am_y.push(c[1]); am_z.push(c[2]);
+                    } else if (is_hydro[i]) {
+                        ip_x.push(c[0]); ip_y.push(c[1]); ip_z.push(c[2]);
+                    } else {
+                        bb_x.push(c[0]); bb_y.push(c[1]); bb_z.push(c[2]);
+                    }
+                }
+                
+                // Scatter Backbone
+                traces.push({
+                    type: 'scatter3d',
+                    mode: 'markers',
+                    x: bb_x, y: bb_y, z: bb_z,
+                    marker: { size: 6, color: atomColors.C },
+                    name: 'Backbone C',
+                    hoverinfo: 'x+y+z'
+                });
+                
+                // Scatter Amide N/O
+                traces.push({
+                    type: 'scatter3d',
+                    mode: 'markers',
+                    x: am_x, y: am_y, z: am_z,
+                    marker: { size: 7, color: atomColors.N },
+                    name: 'Amide N/O'
+                });
+                
+                // Scatter Isopropyl Methyls
+                traces.push({
+                    type: 'scatter3d',
+                    mode: 'markers',
+                    x: ip_x, y: ip_y, z: ip_z,
+                    marker: { size: 8, color: varName('accent-magenta') },
+                    name: 'Hydrophobic C'
+                });
+                
+                // Scatter MBAA Linker
+                if (link_x.length > 0) {
+                    traces.push({
+                        type: 'scatter3d',
+                        mode: 'markers',
+                        x: link_x, y: link_y, z: link_z,
+                        marker: { size: 12, color: varName('accent-green'), line: { color: '#ffffff', width: 2 } },
+                        name: 'MBAA Linker C'
+                    });
+                }
+                
+                // Draw Covalent Bonds
+                bonds.forEach((bond, idx) => {
+                    const u = bond[0];
+                    const v = bond[1];
+                    // Neon green for crosslink bonds
+                    const is_crosslink = (u === n_poly - 1 || v === n_poly - 1);
+                    const bColor = is_crosslink ? varName('accent-green') : '#4f4f5a';
+                    const bWidth = is_crosslink ? 5 : 2.5;
+                    
+                    traces.push({
+                        type: 'scatter3d',
+                        mode: 'lines',
+                        x: [polyCoords[u][0], polyCoords[v][0]],
+                        y: [polyCoords[u][1], polyCoords[v][1]],
+                        z: [polyCoords[u][2], polyCoords[v][2]],
+                        line: { color: bColor, width: bWidth },
+                        hoverinfo: 'none',
+                        showlegend: false
+                    });
+                });
+                
+                // 2. Solvent water coordinates rendering
+                if (showWater && coords.length > n_poly) {
+                    const wCoords = coords.slice(n_poly);
+                    const wx = wCoords.map(c => c[0]);
+                    const wy = wCoords.map(c => c[1]);
+                    const wz = wCoords.map(c => c[2]);
+                    
+                    traces.push({
+                        type: 'scatter3d',
+                        mode: 'markers',
+                        x: wx, y: wy, z: wz,
+                        marker: { size: 4, color: atomColors.W, opacity: 0.18 },
+                        name: 'Solvent Water',
+                        hoverinfo: 'none'
+                    });
+                }
+                
+                // Update stats Area
+                statsArea.innerHTML = `
+                    <div class="stat-row">
+                        <span class="stat-label">水分量 / 脱水度</span>
+                        <span class="stat-val" style="color: var(--accent-magenta);">${scenario.n_water} 水分子 (λ_hydro = ${scenario.scale_hydro.toFixed(2)})</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">慣性半径 (Rg)</span>
+                        <span class="stat-val" style="color: var(--accent-cyan);">${scenario.rg.toFixed(3)} Å</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Fiedler Connectivity (λ2)</span>
+                        <span class="stat-val" style="color: var(--accent-green);">${scenario.l2.toFixed(5)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">水和水素結合数 (AM-W)</span>
+                        <span class="stat-val">${scenario.hbonds} 箇所</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">疎水結合数 (CH3-CH3)</span>
+                        <span class="stat-val" style="color: #ffaa00;">${scenario.hydro} 箇所</span>
+                    </div>
+                `;
+                
+                renderPlotly(traces, polyCoords);
+            }
+        }
+
+        // Helper to get CSS variable values
+        function varName(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue('--' + name).trim();
+        }
+
+        function renderPlotly(traces, limitCoords) {
+            const allX = limitCoords.map(c => c[0]);
+            const allY = limitCoords.map(c => c[1]);
+            const allZ = limitCoords.map(c => c[2]);
+            
+            const minX = Math.min(...allX), maxX = Math.max(...allX);
+            const minY = Math.min(...allY), maxY = Math.max(...allY);
+            const minZ = Math.min(...allZ), maxZ = Math.max(...allZ);
+            
+            const midX = (minX + maxX) / 2;
+            const midY = (minY + maxY) / 2;
+            const midZ = (minZ + maxZ) / 2;
+            
+            const maxRange = Math.max(maxX - minX, maxY - minY, maxZ - minZ) / 2 + 1.2;
+            
+            const layout = {
+                paper_bgcolor: '#000000',
+                plot_bgcolor: '#000000',
+                margin: { l: 0, r: 0, t: 0, b: 0 },
+                showlegend: false,
+                scene: {
+                    xaxis: {
+                        range: [midX - maxRange, midX + maxRange],
+                        backgroundcolor: '#000',
+                        gridcolor: '#1a1a24',
+                        showbackground: true,
+                        zerolinecolor: '#222',
+                        showticklabels: false,
+                        title: ''
+                    },
+                    yaxis: {
+                        range: [midY - maxRange, midY + maxRange],
+                        backgroundcolor: '#000',
+                        gridcolor: '#1a1a24',
+                        showbackground: true,
+                        zerolinecolor: '#222',
+                        showticklabels: false,
+                        title: ''
+                    },
+                    zaxis: {
+                        range: [midZ - maxRange, midZ + maxRange],
+                        backgroundcolor: '#000',
+                        gridcolor: '#1a1a24',
+                        showbackground: true,
+                        zerolinecolor: '#222',
+                        showticklabels: false,
+                        title: ''
+                    },
+                    aspectmode: 'manual',
+                    aspectratio: { x: 1, y: 1, z: 1 }
+                }
+            };
+            
+            Plotly.newPlot('plot-container', traces, layout, { responsive: true, displayModeBar: false });
+        }
+
+        // --- 2D Transition Profile Mini Plot (Synced with 3D slider) ---
+        let miniChartLayout = null;
+        let miniChartData = [];
+        
+        function buildMini2DChart() {
+            const data = VIEWER_DATA[currentModel];
+            if (!data) return;
+            
+            const scenarioKeys = Object.keys(data.scenarios).sort((a, b) => parseInt(a) - parseInt(b)); // sort ascending for plotting
+            
+            const waters = scenarioKeys.map(k => parseInt(k));
+            const rgs = scenarioKeys.map(k => data.scenarios[k].rg);
+            const l2s = scenarioKeys.map(k => data.scenarios[k].l2);
+            
+            // Normalize L2 to fit on double Y axis or single scaled axis
+            const maxRg = Math.max(...rgs), minRg = Math.min(...rgs);
+            const maxL2 = Math.max(...l2s), minL2 = Math.min(...l2s);
+            
+            // Map L2 to scale similar to Rg for single-plot visibility
+            const l2Scaled = l2s.map(l => minRg + (l - minL2) / (maxL2 - minL2 + 1e-6) * (maxRg - minRg));
+            
+            const traceRg = {
+                x: waters,
+                y: rgs,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Rg',
+                line: { color: varName('accent-magenta'), width: 2 },
+                marker: { size: 4 }
+            };
+            
+            const traceL2 = {
+                x: waters,
+                y: l2Scaled,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'λ2 (scaled)',
+                line: { color: varName('accent-green'), width: 2, dash: 'dot' },
+                marker: { size: 4 }
+            };
+            
+            // Current indicator point
+            const traceIndicator = {
+                x: [parseInt(currentScenarioKey)],
+                y: [data.scenarios[currentScenarioKey].rg],
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Current',
+                marker: { size: 10, color: varName('accent-cyan'), symbol: 'circle-open', line: { width: 3 } }
+            };
+            
+            miniChartData = [traceRg, traceL2, traceIndicator];
+            
+            miniChartLayout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                margin: { l: 25, r: 10, t: 5, b: 20 },
+                xaxis: {
+                    autorange: 'reverse', // show dehydration from 180 to 0
+                    gridcolor: 'rgba(255,255,255,0.05)',
+                    tickfont: { color: '#8e8e9f', size: 9 },
+                    zeroline: false
+                },
+                yaxis: {
+                    gridcolor: 'rgba(255,255,255,0.05)',
+                    tickfont: { color: '#8e8e9f', size: 9 },
+                    zeroline: false
+                },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('mini-2d-chart', miniChartData, miniChartLayout, { responsive: true, displayModeBar: false });
+        }
+
+        function updateMini2DChartIndicator() {
+            const data = VIEWER_DATA[currentModel];
+            if (!data || !miniChartData[2]) return;
+            
+            const currentRg = data.scenarios[currentScenarioKey].rg;
+            
+            // Update indicator coordinate
+            const update = {
+                x: [[parseInt(currentScenarioKey)]],
+                y: [[currentRg]]
+            };
+            
+            Plotly.restyle('mini-2d-chart', update, [2]);
+        }
+
+        // Initialize on window load
+        window.addEventListener('load', initDashboard);
+    </script>
+</body>
+</html>

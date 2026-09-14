@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水溶媒エージェント × ペプチド分子模型 シミュレーター</title>
+    
+    <!-- React, ReactDOM, Babel (ブラウザ上でのJSXコンパイル用) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS (UIデザイン用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Three.js & OrbitControls (3D描画用) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ペプチドトポロジーデータ (親水・疎水の混在した鎖状モデル) ---
+        // RDKitで抽出された情報に基づき、14原子の主鎖＋疎水性側鎖の模擬データを定義
+        const PEPTIDE_DATA = {
+            "atoms": [
+                { "id": 0, "element": "N", "pos": [-4.0, 1.0, 0.0], "hydrophobicity": -0.4, "h_bond": "donor", "radius": 1.55 },
+                { "id": 1, "element": "C", "pos": [-3.0, 0.0, 0.0], "hydrophobicity": 0.1, "h_bond": "none", "radius": 1.7 },
+                { "id": 2, "element": "C", "pos": [-2.0, 0.8, -0.5], "hydrophobicity": -0.2, "h_bond": "none", "radius": 1.7 },
+                { "id": 3, "element": "O", "pos": [-2.1, 2.0, -0.4], "hydrophobicity": -0.5, "h_bond": "acceptor", "radius": 1.5 },
+                
+                { "id": 4, "element": "N", "pos": [-0.9, 0.1, -1.0], "hydrophobicity": -0.4, "h_bond": "donor", "radius": 1.55 },
+                { "id": 5, "element": "C", "pos": [0.2, 0.8, -1.5], "hydrophobicity": 0.1, "h_bond": "none", "radius": 1.7 },
+                { "id": 6, "element": "C", "pos": [1.3, -0.1, -2.0], "hydrophobicity": -0.2, "h_bond": "none", "radius": 1.7 },
+                { "id": 7, "element": "O", "pos": [1.1, -1.3, -2.0], "hydrophobicity": -0.5, "h_bond": "acceptor", "radius": 1.5 },
+                
+                { "id": 8, "element": "N", "pos": [2.4, 0.5, -2.5], "hydrophobicity": -0.4, "h_bond": "donor", "radius": 1.55 },
+                { "id": 9, "element": "C", "pos": [3.6, -0.3, -3.0], "hydrophobicity": 0.1, "h_bond": "none", "radius": 1.7 },
+                
+                // 側鎖（アラニン風の小さな疎水基、およびロイシン風の大きな疎水基）
+                { "id": 10, "element": "C", "pos": [-3.2, -1.4, -0.5], "hydrophobicity": 0.8, "h_bond": "none", "radius": 1.7 },
+                { "id": 11, "element": "C", "pos": [-3.4, -2.4, 0.5], "hydrophobicity": 1.2, "h_bond": "none", "radius": 1.7 },
+                { "id": 12, "element": "C", "pos": [0.4, 2.2, -1.0], "hydrophobicity": 1.0, "h_bond": "none", "radius": 1.7 },
+                { "id": 13, "element": "C", "pos": [0.6, 3.2, -2.1], "hydrophobicity": 1.5, "h_bond": "none", "radius": 1.7 }
+            ],
+            "bonds": [
+                // 主鎖結合
+                { "source": 0, "target": 1, "length": 1.45, "is_amide": false },
+                { "source": 1, "target": 2, "length": 1.52, "is_amide": false },
+                { "source": 2, "target": 3, "length": 1.23, "is_amide": false },
+                { "source": 2, "target": 4, "length": 1.33, "is_amide": true }, // アミド平面（ねじれ制御対象）
+                
+                { "source": 4, "target": 5, "length": 1.45, "is_amide": false },
+                { "source": 5, "target": 6, "length": 1.52, "is_amide": false },
+                { "source": 6, "target": 7, "length": 1.23, "is_amide": false },
+                { "source": 6, "target": 8, "length": 1.33, "is_amide": true }, // アミド平面（ねじれ制御対象）
+                
+                { "source": 8, "target": 9, "length": 1.45, "is_amide": false },
+                
+                // 側鎖の結合
+                { "source": 1, "target": 10, "length": 1.52, "is_amide": false },
+                { "source": 10, "target": 11, "length": 1.52, "is_amide": false },
+                { "source": 5, "target": 12, "length": 1.52, "is_amide": false },
+                { "source": 12, "target": 13, "length": 1.52, "is_amide": false }
+            ]
+        };
+
+        // 物理シミュレーション用の原子クラス
+        class SimAtom {
+            constructor(data) {
+                this.id = data.id;
+                this.element = data.element;
+                this.pos = new THREE.Vector3(...data.pos);
+                this.prevPos = new THREE.Vector3(...data.pos);
+                this.force = new THREE.Vector3(0, 0, 0);
+                this.hydrophobicity = data.hydrophobicity;
+                this.hBond = data.hBond;
+                this.radius = data.radius;
+                this.mass = data.element === 'H' ? 1.0 : 12.0;
+            }
+        }
+
+        function App() {
+            const mountRef = useRef(null);
+
+            // シミュレーション調節パラメータのState定義
+            const [temperature, setTemperature] = useState(0.20); // 熱ゆらぎ強度
+            const [hydrophobicStrength, setHydrophobicStrength] = useState(0.35); // 疎水圧強度
+            const [hBondStrength, setHBondStrength] = useState(0.40); // 水素結合強度
+            const [isPlaying, setIsPlaying] = useState(true);
+
+            // Refによるパラメータ同期（描画ループ内での高速参照用）
+            const paramsRef = useRef({ temperature, hydrophobicStrength, hBondStrength, isPlaying });
+            useEffect(() => {
+                paramsRef.current = { temperature, hydrophobicStrength, hBondStrength, isPlaying };
+            }, [temperature, hydrophobicStrength, hBondStrength, isPlaying]);
+
+            useEffect(() => {
+                if (!mountRef.current) return;
+
+                // --- 1. Three.jsシーン構築 ---
+                const width = mountRef.current.clientWidth;
+                const height = mountRef.current.clientHeight;
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x0b0f19);
+
+                const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+                camera.position.set(0, 3, 10);
+
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(width, height);
+                renderer.shadowMap.enabled = true;
+                mountRef.current.appendChild(renderer.domElement);
+
+                // カメラコントロール
+                const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+
+                // ライティング
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+                scene.add(ambientLight);
+
+                const mainLight = new THREE.DirectionalLight(0xffffff, 0.9);
+                mainLight.position.set(5, 12, 8);
+                scene.add(mainLight);
+
+                const subLight = new THREE.DirectionalLight(0x70a0ff, 0.4);
+                subLight.position.set(-5, -5, -3);
+                scene.add(subLight);
+
+                // --- 2. 物理演算用のデータ初期化 ---
+                const atoms = PEPTIDE_DATA.atoms.map(a => new SimAtom(a));
+                const bonds = PEPTIDE_DATA.bonds;
+
+                // --- 3. 3Dモデル生成（Three.jsメッシュ） ---
+                const atomMeshes = [];
+                const bondMeshes = [];
+
+                const elementColors = {
+                    "C": 0x64748b, // グレー
+                    "N": 0x3b82f6, // 青
+                    "O": 0xef4444, // 赤
+                    "H": 0xf8fafc  // 白
+                };
+
+                // 原子球体の配置
+                atoms.forEach(atom => {
+                    const geometry = new THREE.SphereGeometry(atom.radius * 0.23, 32, 32);
+                    let baseColor = elementColors[atom.element] || 0x94a3b8;
+
+                    const material = new THREE.MeshStandardMaterial({
+                        color: baseColor,
+                        roughness: 0.2,
+                        metalness: 0.1,
+                    });
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.copy(atom.pos);
+                    scene.add(mesh);
+                    atomMeshes.push(mesh);
+
+                    // 性質インジケータ（親水基/疎水基を視覚強調する半透明のオーラ）
+                    if (atom.hydrophobicity > 0.5) {
+                        // 疎水基：オレンジのワイヤーフレーム
+                        const outlineGeom = new THREE.SphereGeometry(atom.radius * 0.33, 16, 16);
+                        const outlineMat = new THREE.MeshBasicMaterial({
+                            color: 0xf97316,
+                            wireframe: true,
+                            transparent: true,
+                            opacity: 0.12
+                        });
+                        const outline = new THREE.Mesh(outlineGeom, outlineMat);
+                        mesh.add(outline);
+                    } else if (atom.hBond !== 'none') {
+                        // 親水基（水素結合能あり）：シアンのワイヤーフレーム
+                        const outlineGeom = new THREE.SphereGeometry(atom.radius * 0.33, 16, 16);
+                        const outlineMat = new THREE.MeshBasicMaterial({
+                            color: 0x06b6d4,
+                            wireframe: true,
+                            transparent: true,
+                            opacity: 0.12
+                        });
+                        const outline = new THREE.Mesh(outlineGeom, outlineMat);
+                        mesh.add(outline);
+                    }
+                });
+
+                // 結合シリンダーの配置
+                bonds.forEach(bond => {
+                    const geometry = new THREE.CylinderGeometry(0.06, 0.06, 1, 8);
+                    const color = bond.is_amide ? 0x10b981 : 0x475569; // アミド結合は緑、その他はダークグレー
+                    const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4 });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    scene.add(mesh);
+                    bondMeshes.push(mesh);
+                });
+
+                // --- 4. 物理エンジン（Verlet積分 & 水溶媒エージェントロジック） ---
+                const runPhysics = (dt) => {
+                    const { temperature: temp, hydrophobicStrength: hydro, hBondStrength: hbond } = paramsRef.current;
+
+                    // 全体の重心を算出
+                    const centerOfMass = new THREE.Vector3(0, 0, 0);
+                    atoms.forEach(a => centerOfMass.add(a.pos));
+                    centerOfMass.divideScalar(atoms.length);
+
+                    // 各原子に作用する力の計算
+                    atoms.forEach(atom => {
+                        atom.force.set(0, 0, 0);
+
+                        // 【ルールC】熱ゆらぎ（ホワイトノイズによるブラウン運動）
+                        const randForce = new THREE.Vector3(
+                            (Math.random() - 0.5) * temp * 15,
+                            (Math.random() - 0.5) * temp * 15,
+                            (Math.random() - 0.5) * temp * 15
+                        );
+                        atom.force.add(randForce);
+
+                        // 局所的な露出度（溶媒接触度）の簡易推定
+                        let neighborsCount = 0;
+                        atoms.forEach(other => {
+                            if (atom.id !== other.id) {
+                                const dist = atom.pos.distanceTo(other.pos);
+                                if (dist < 2.5) {
+                                    neighborsCount += (2.5 - dist);
+                                }
+                            }
+                        });
+                        // 密な領域（奥まった位置）ほど0に近づき、露出しているほど1に近づく
+                        const exposure = Math.max(0.1, 1.0 - (neighborsCount / 6.0));
+
+                        // 【ルールA】親水基への引手（水のある「外側」方向へと引っ張る）
+                        if (atom.hBond !== 'none') {
+                            const pullOutside = new THREE.Vector3().subVectors(atom.pos, centerOfMass).normalize();
+                            // 内側に埋もれている親水基ほど、外側に向かう力を強く受ける
+                            atom.force.addScaledVector(pullOutside, (1.0 - exposure) * hbond * 2.5);
+                        }
+
+                        // 【ルールB】疎水基への押し込み斥力（水から排除されて「内側（重心）」へ向かう）
+                        if (atom.hydrophobicity > 0) {
+                            const pushInside = new THREE.Vector3().subVectors(centerOfMass, atom.pos).normalize();
+                            // 外側に露出している疎水基ほど、内側へ押し戻される力を強く受ける
+                            atom.force.addScaledVector(pushInside, exposure * atom.hydrophobicity * hydro * 4.5);
+                        }
+                    });
+
+                    // 分子内ペア間相互作用（水素結合、疎水結合、立体障害による反発）
+                    for (let i = 0; i < atoms.length; i++) {
+                        for (let j = i + 1; j < atoms.length; j++) {
+                            const a = atoms[i];
+                            const b = atoms[j];
+
+                            // 直接結合しているペアはトポロジーで拘束されているため対象外とする
+                            const alreadyBonded = bonds.some(bnd => 
+                                (bnd.source === a.id && bnd.target === b.id) || 
+                                (bnd.source === b.id && bnd.target === a.id)
+                            );
+                            if (alreadyBonded) continue;
+
+                            const dir = new THREE.Vector3().subVectors(b.pos, a.pos);
+                            const dist = dir.length();
+                            if (dist === 0) continue;
+                            dir.normalize();
+
+                            // 水素結合（ドナーとアクセプターの引き合い）
+                            if (hbond > 0 && dist < 3.2 && dist > 1.2) {
+                                if ((a.hBond === 'donor' && b.hBond === 'acceptor') || (a.hBond === 'acceptor' && b.hBond === 'donor')) {
+                                    const hbondPull = (3.2 - dist) * hbond * 2.2;
+                                    a.force.addScaledVector(dir, hbondPull);
+                                    b.force.addScaledVector(dir, -hbondPull);
+                                }
+                            }
+
+                            // 疎水結合（水から追いやられた疎水基同士の引き合い）
+                            if (hydro > 0 && dist < 3.5 && dist > 1.2) {
+                                if (a.hydrophobicity > 0 && b.hydrophobicity > 0) {
+                                    const hydroPull = (3.5 - dist) * hydro * (a.hydrophobicity + b.hydrophobicity) * 1.8;
+                                    a.force.addScaledVector(dir, hydroPull);
+                                    b.force.addScaledVector(dir, -hydroPull);
+                                }
+                            }
+
+                            // 立体障害（原子同士の球体衝突反発）
+                            const collisionRadius = (a.radius + b.radius) * 0.45;
+                            if (dist < collisionRadius) {
+                                const pushBack = (collisionRadius - dist) * 18.0;
+                                a.force.addScaledVector(dir, -pushBack);
+                                b.force.addScaledVector(dir, pushBack);
+                            }
+                        }
+                    }
+
+                    // 異常な力（無限大や発散）を防ぐクランプ処理
+                    atoms.forEach(atom => {
+                        atom.force.clampLength(0, 45.0);
+                    });
+
+                    // ベルレ積分(Verlet Integration)による位置アップデート
+                    const damping = 0.94; // 溶媒の抵抗（粘性）
+                    atoms.forEach(atom => {
+                        const currentPos = atom.pos.clone();
+                        const acceleration = atom.force.clone().divideScalar(atom.mass);
+
+                        // x_new = x + (x - x_prev) * damp + a * dt^2
+                        atom.pos.addScaledVector(
+                            new THREE.Vector3().subVectors(atom.pos, atom.prevPos),
+                            damping
+                        ).addScaledVector(acceleration, dt * dt);
+
+                        atom.prevPos.copy(currentPos);
+                    });
+
+                    // 結合長拘束の適用（Position-Based Dynamics方式の収束解決）
+                    const solveIterations = 8;
+                    for (let iter = 0; iter < solveIterations; iter++) {
+                        bonds.forEach(bond => {
+                            const a = atoms[bond.source];
+                            const b = atoms[bond.target];
+
+                            const dir = new THREE.Vector3().subVectors(b.pos, a.pos);
+                            const currentLen = dir.length();
+                            if (currentLen === 0) return;
+
+                            const diff = currentLen - bond.length;
+                            const correction = dir.normalize().multiplyScalar(diff * 0.5);
+
+                            // アミド（ペプチド結合）は回転可能軸ではなく固定平面性が高いため、より強力に固定
+                            const stiffness = bond.is_amide ? 1.0 : 0.8;
+
+                            a.pos.addScaledVector(correction, stiffness);
+                            b.pos.addScaledVector(correction, -stiffness);
+                        });
+                    }
+                };
+
+                // --- 5. リアルタイムループ ---
+                let lastTime = performance.now();
+                const animate = () => {
+                    requestAnimationFrame(animate);
+
+                    const currentTime = performance.now();
+                    let dt = (currentTime - lastTime) / 1000;
+                    lastTime = currentTime;
+                    if (dt > 0.1) dt = 0.1; // 極端なコマ落ち時に物理演算が破綻（爆発）するのを防ぐ
+
+                    if (paramsRef.current.isPlaying) {
+                        // タイムステップを分割（サブステップ）してシミュレーションの解像度と安定性を高める
+                        const subSteps = 3;
+                        for (let i = 0; i < subSteps; i++) {
+                            runPhysics(dt / subSteps);
+                        }
+                    }
+
+                    // 原子メッシュの3D座標更新
+                    atoms.forEach((atom, idx) => {
+                        atomMeshes[idx].position.copy(atom.pos);
+                    });
+
+                    // 結合シリンダーの伸縮と配置の同期
+                    bonds.forEach((bond, idx) => {
+                        const a = atoms[bond.source];
+                        const b = atoms[bond.target];
+                        const mesh = bondMeshes[idx];
+
+                        // 中間点
+                        const midPoint = new THREE.Vector3().addVectors(a.pos, b.pos).multiplyScalar(0.5);
+                        mesh.position.copy(midPoint);
+
+                        // シリンダーの方向決め
+                        const dir = new THREE.Vector3().subVectors(b.pos, a.pos);
+                        const len = dir.length();
+                        mesh.scale.set(1, len, 1);
+
+                        dir.normalize();
+                        const initialDir = new THREE.Vector3(0, 1, 0);
+                        const quaternion = new THREE.Quaternion().setFromUnitVectors(initialDir, dir);
+                        mesh.setRotationFromQuaternion(quaternion);
+                    });
+
+                    controls.update();
+                    renderer.render(scene, camera);
+                };
+
+                animate();
+
+                // ウィンドウサイズ変更の検知
+                const handleResize = () => {
+                    if (!mountRef.current) return;
+                    const w = mountRef.current.clientWidth;
+                    const h = mountRef.current.clientHeight;
+                    camera.aspect = w / h;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(w, h);
+                };
+                window.addEventListener('resize', handleResize);
+
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    if (mountRef.current && renderer.domElement) {
+                        mountRef.current.removeChild(renderer.domElement);
+                    }
+                };
+            }, []);
+
+            return (
+                <div className="flex flex-col w-screen h-screen text-slate-100 font-sans">
+                    {/* ヘッダー */}
+                    <header className="flex justify-between items-center px-6 py-4 bg-slate-900 border-b border-slate-800 z-10">
+                        <div>
+                            <h1 className="text-lg font-bold tracking-wide">
+                                水溶媒エージェント × ペプチド分子模型 3Dシミュレーター
+                            </h1>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                                個別の水分子の座標を計算せず、3つの「見えざる手」の局所ベクトル力で構造探索を誘導するプロトタイプ
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            <span className="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                物理方式: Verlet & PBD
+                            </span>
+                        </div>
+                    </header>
+
+                    {/* メインビューポートエリア */}
+                    <div className="flex-1 relative flex">
+                        {/* 3Dキャンバスのコンテナ */}
+                        <div ref={mountRef} className="w-full h-full" />
+
+                        {/* コントロールパネル */}
+                        <div className="absolute top-6 right-6 w-80 bg-slate-900/90 backdrop-blur-md p-5 rounded-lg border border-slate-700 shadow-2xl flex flex-col gap-5 z-20">
+                            <div>
+                                <h2 className="text-sm font-semibold border-b border-slate-700 pb-2 mb-3">
+                                    溶媒エージェントの「手」を制御
+                                </h2>
+
+                                {/* 温度スライダー */}
+                                <div className="mb-4">
+                                    <div className="flex justify-between text-xs mb-1 text-slate-300">
+                                        <span>🌡️ 溶媒の温度 (熱ゆらぎ/ルールC)</span>
+                                        <span className="font-mono font-bold text-sky-400">{temperature.toFixed(2)}</span>
+                                    </div>
+                                    <input 
+                                        type="range" min="0.0" max="0.5" step="0.01" 
+                                        value={temperature} 
+                                        onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                                        className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-500"
+                                    />
+                                </div>
+
+                                {/* 疎水圧スライダー */}
+                                <div className="mb-4">
+                                    <div className="flex justify-between text-xs mb-1 text-slate-300">
+                                        <span>💧 疎水圧 (内側へ押し込む手/ルールB)</span>
+                                        <span className="font-mono font-bold text-orange-400">{hydrophobicStrength.toFixed(2)}</span>
+                                    </div>
+                                    <input 
+                                        type="range" min="0.0" max="1.0" step="0.05" 
+                                        value={hydrophobicStrength} 
+                                        onChange={(e) => setHydrophobicStrength(parseFloat(e.target.value))}
+                                        className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                                    />
+                                </div>
+
+                                {/* 水素結合スライダー */}
+                                <div className="mb-2">
+                                    <div className="flex justify-between text-xs mb-1 text-slate-300">
+                                        <span>🔗 水素結合力 (親水基の引き合い/ルールA)</span>
+                                        <span className="font-mono font-bold text-cyan-400">{hBondStrength.toFixed(2)}</span>
+                                    </div>
+                                    <input 
+                                        type="range" min="0.0" max="1.0" step="0.05" 
+                                        value={hBondStrength} 
+                                        onChange={(e) => setHBondStrength(parseFloat(e.target.value))}
+                                        className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* 再生/一時停止 */}
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => setIsPlaying(!isPlaying)}
+                                    className={`w-full py-2 px-4 rounded text-xs font-bold transition-colors ${
+                                        isPlaying ? 'bg-rose-600 hover:bg-rose-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                                    }`}
+                                >
+                                    {isPlaying ? 'シミュレーション一時停止' : 'シミュレーション再開'}
+                                </button>
+                            </div>
+
+                            {/* 凡例表示 */}
+                            <div className="text-xs bg-slate-950/50 p-3 rounded border border-slate-800 text-slate-400 space-y-1.5 leading-relaxed">
+                                <span className="font-semibold text-slate-300 block mb-1">凡例：</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
+                                    <span>アミド結合 (剛性が高い可動境界)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#f97316]" />
+                                    <span>疎水基 (重心へ押し込まれる原子)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4]" />
+                                    <span>親水基 (外側や他の親水基へ引き合う原子)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
