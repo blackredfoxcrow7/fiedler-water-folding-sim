@@ -5,10 +5,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Paper DOI](https://img.shields.io/badge/Paper-Zenodo--DOI-blue.svg)](https://doi.org/10.5281/zenodo.22743112)
+[![Program Guide](https://img.shields.io/badge/Guide-Program%20Architecture-purple.svg)](PROGRAM_GUIDE.md)
 [![Author: Yoshihiro Honda](https://img.shields.io/badge/Author-Yoshihiro%20Honda-orange.svg)](#author)
 
 > **Can protein folding be simulated without calculating physical potential energy (AMBER/CHARMM forcefields)?**  
 > **Yes.** This repository presents a novel **Spectral Graph Theory** algorithm that drives peptide folding purely by maximizing the **Fiedler value ($\lambda_2$)**—the second smallest eigenvalue of the graph Laplacian matrix.
+
+---
+
+## 📖 Complete Program Guide & Architecture
+For a detailed guide on input formats (SMILES, 1-letter/3-letter amino acid sequences), code structure, and simulation models, see:
+👉 📘 **[PROGRAM_GUIDE.md](PROGRAM_GUIDE.md)** (プログラム全構成・使用方法解説ガイド)
 
 ---
 
@@ -18,14 +25,17 @@
    * Eliminates the need for evaluating electrostatics, van der Waals, or torsional potential integrals.
    * By treating atomic contacts as weighted edges, maximizing algebraic connectivity ($\lambda_2$) drives the benchmark 10-residue peptide **Chignolin (PDB ID: 1UAO)** into its native $\beta$-hairpin conformation with a radius of gyration ($R_g = 5.12 \text{ \AA}$) closely matching experimental values ($5.17 \text{ \AA}$).
 
-2. **Resolution of Levinthal's Paradox via Contact-Locking**
+2. **Flexible Chemical Input (SMILES & Sequences)**
+   * Built on `PeptideAgent` ([`peptide_agent.py`](peptide_agent.py)), which parses SMILES strings, 1-letter sequences (`YYDPETGTWY`), and 3-letter sequences (`Tyr-Tyr-Asp-...`), initializing 3D conformers via RDKit ETKDGv3.
+
+3. **Resolution of Levinthal's Paradox via Contact-Locking**
    * Implements a **Contact-Locking mechanism** that permanently locks favorable non-covalent contacts into the topological graph.
    * Locked edges act as structural scaffolds, progressively reducing spatial degrees of freedom and giving rise to **cooperative folding funnels**.
 
-3. **Quantitative Proof of the "Framework Model"**
+4. **Quantitative Proof of the "Framework Model"**
    * Demonstrates via a **Polar-Priority Phase Model** that forming backbone hydrogen bonds prior to hydrophobic packing leads to stable, deterministic structural convergence ($R_g \approx 5.12 \text{ \AA}$, error < 1.0%).
 
-4. **Scalability to Larger Peptides & Solvent Network PCET Duality**
+5. **Scalability to Larger Peptides & Solvent Network PCET Duality**
    * Successfully folds **CLN025** and the 20-residue **Trp-cage (PDB ID: 1L2Y)** with **< 1.9% error**.
    * Establishes a theoretical duality between solvent hydration shell Fiedler maximization and Grotthuss proton hopping / Proton-Coupled Electron Transfer (PCET) pathways.
 
@@ -44,11 +54,12 @@
 
 ---
 
-## 📄 Official Published Manuscript (Zenodo DOI)
+## 📄 Official Published Manuscripts & Documentation
 
-The complete academic manuscript detailing the theory, algorithm proofs, and biophysical implications is officially published on Zenodo:
 * 📄 **[Zenodo Paper Link](https://doi.org/10.5281/zenodo.22743112)**: *"Graph-Spectral Protein Folding: Simulating Peptide Self-Assembly via Laplacian Fiedler Vector Optimization"* (DOI: `10.5281/zenodo.22743112`)
-* 📄 **Local Repository Copy**: [paper_draft.md](paper_draft.md)
+* 📄 **English Paper Manuscript**: [paper_draft.md](paper_draft.md)
+* 📄 **Japanese Paper Translation (日本語訳)**: [paper_draft_ja.md](paper_draft_ja.md)
+* 📘 **Complete Program Guide**: [PROGRAM_GUIDE.md](PROGRAM_GUIDE.md)
 
 ---
 
@@ -63,7 +74,7 @@ pip install numpy scipy rdkit matplotlib flask
 ```
 
 ### Running the Simulator
-To run the Framework (Polar-Priority) Folding Model for Chignolin:
+To run the Framework (Polar-Priority) Folding Model for Chignolin (SMILES or sequence):
 
 ```bash
 # 1. Clone the repository
@@ -88,7 +99,7 @@ The repository includes a custom Three.js WebGL 3D viewer (`viewer.html`) that r
 ## 👤 Author
 
 **Yoshihiro Honda (本多 義弘)**  
-Independent Researcher, Japan  
+Independent Researcher in Organic Chemistry & Computational Chemistry, Japan  
 GitHub: [@blackredfoxcrow7](https://github.com/blackredfoxcrow7)  
 Publication DOI: [10.5281/zenodo.22743112](https://doi.org/10.5281/zenodo.22743112)  
 
