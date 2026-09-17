@@ -13,8 +13,8 @@
 
 ---
 
-## 📖 Complete Program Guide & Architecture
-For a detailed guide on input formats (SMILES, 1-letter/3-letter amino acid sequences), code structure, and simulation models, see:
+## 📖 Complete Program Architecture Guide
+For a detailed guide on input formats (SMILES, 1-letter/3-letter amino acid sequences), code structure, and simulation models in English & Japanese, see:
 👉 📘 **[PROGRAM_GUIDE.md](PROGRAM_GUIDE.md)** (プログラム全構成・使用方法解説ガイド)
 
 ---
@@ -59,7 +59,7 @@ For a detailed guide on input formats (SMILES, 1-letter/3-letter amino acid sequ
 * 📄 **[Zenodo Paper Link](https://doi.org/10.5281/zenodo.22743112)**: *"Graph-Spectral Protein Folding: Simulating Peptide Self-Assembly via Laplacian Fiedler Vector Optimization"* (DOI: `10.5281/zenodo.22743112`)
 * 📄 **English Paper Manuscript**: [paper_draft.md](paper_draft.md)
 * 📄 **Japanese Paper Translation (日本語訳)**: [paper_draft_ja.md](paper_draft_ja.md)
-* 📘 **Complete Program Guide**: [PROGRAM_GUIDE.md](PROGRAM_GUIDE.md)
+* 📘 **Complete Program Guide (Bilingual)**: [PROGRAM_GUIDE.md](PROGRAM_GUIDE.md)
 
 ---
 

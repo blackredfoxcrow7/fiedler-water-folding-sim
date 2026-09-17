@@ -1,86 +1,96 @@
-# 🧬 プログラム全構成・使用方法解説ガイド (Program Guide & Architecture)
+# 🧬 Program Architecture & Usage Guide (プログラム全構成ガイド)
 
-本ドキュメントは、本リポジトリ（`fiedler-water-folding-sim`）に含まれる各プログラムの役割、入力フォーマット（SMILES、アミノ酸配列、PDB）、動作仕様、および出力ファイルについて詳細に解説したガイドです。
+This document provides a comprehensive overview of the core engines, peptide folding simulation models, structural evaluation tools, and 3D WebGL viewers included in the `fiedler-water-folding-sim` repository.
 
----
-
-## 1. コア・解析エンジン
-
-### 核心クラス：`PeptideAgent` ([`peptide_agent.py`](peptide_agent.py))
-ペプチドおよび化学物質の入力解釈、3D構造構築、トポロジー抽出、および Fiedler値算出を司る共通のコアエンジンです。
-
-* **対応入力フォーマット**（自動判定）:
-  1. **1文字アミノ酸配列**: 例 `YYDPETGTWY` （チグノリン）、`NLYIQWLKDGGPSSGRPPPS` （Trp-cage）
-  2. **3文字アミノ酸配列**: 例 `Tyr-Tyr-Asp-Pro-Glu-Thr-Gly-Thr-Trp-Tyr`
-  3. **SMILES 文字列**: 例 `CC(C)...` や高分子・ペプチドの化学構造SMILES
-* **主な処理機能**:
-  * RDKit による分子グラフの解釈および 3D 初期構造の生成（ETKDGv3 アルゴリズム）
-  * 主鎖・側鎖の回転可能な二面角ジョイント（$\phi, \psi$）の自動特定
-  * グラフ・ラプラシアン行列 $L = D - A$ および Fiedler値（$\lambda_2$）のリアルタイム算出
+*Note: A full Japanese translation is provided in the second half of this document. (後半に日本語訳を併記しています。)*
 
 ---
 
-## 2. チグノリン（Chignolin）および主要フォールディング・プログラム
+## 🇺🇸 English Guide
 
-論文で発表された各モデルを実行するためのバックエンドおよび起動スクリプト一覧です。
+### 1. Core Engine & Molecular Interpreter
 
-### ①【主論文モデル】水素結合優先段階モデル (Framework Model)
-* **バックエンド**: [`server_overall_fiedler_polar_priority.py`](server_overall_fiedler_polar_priority.py)
-* **起動スクリプト**: [`run_overall_fiedler_polar_priority.py`](run_overall_fiedler_polar_priority.py)
-* **入力**: チグノリン配列 (`YYDPETGTWY`) または対応 SMILES
-* **処理内容**: 
-  * **Phase 1 (0〜4サイクル)**: 主鎖の水素結合（Polar）の Fiedler値貢献のみを評価・ロックし、$\beta$シート骨格を最優先形成。
-  * **Phase 2 (5〜9サイクル)**: 骨格固定後、疎水性コア（Trp9, Tyr1, Tyr3等）のパッキングを解禁・固定。
-* **出力**: [`1uao_folded_directional.json`](1uao_folded_directional.json) （慣性半径 $R_g = 5.12\text{ \AA}$、実験値 $5.17\text{ \AA}$ と一致）
-
-### ② 水分子直接結合モデル (Solvent-Direct Coupled Model)
-* **バックエンド**: [`server_overall_fiedler_solvent_direct.py`](server_overall_fiedler_solvent_direct.py)
-* **起動スクリプト**: [`run_overall_fiedler_solvent_direct.py`](run_overall_fiedler_solvent_direct.py)
-* **入力**: ペプチド配列 ＋ 周囲の明示的水分子集団 ($O_w$)
-* **処理内容**: 「ペプチド＋水和水素結合ネットワーク」全体の統合 Fiedler値を直接最大化。すべての試行で $R_g \approx 5.12\text{--}5.29\text{ \AA}$ に 100% 収束。
-
-### ③ トポロジカル核形成伝播モデル (Nucleation-Propagation Model)
-* **バックエンド**: [`server_overall_fiedler_nucleation.py`](server_overall_fiedler_nucleation.py)
-* **起動スクリプト**: [`run_overall_fiedler_nucleation.py`](run_overall_fiedler_nucleation.py)
-* **入力**: 長鎖ペプチド Trp-cage (20残基: `NLYIQWLKDGGPSSGRPPPS`) または チグノリン
-* **処理内容**: 形成されたコンタクトを核（Nucleus）として固定し、自由度を決定論的に絞り込みながら多残基ペプチドへとスケーリング（Trp-cage 誤差 < 1.9%）。
-
-### ④ 高速化最適化モデル (Optimized Hydrophobic Model)
-* **バックエンド**: [`server_overall_fiedler_hydro_priority_optimized.py`](server_overall_fiedler_hydro_priority_optimized.py)
-* **起動スクリプト**: [`run_overall_fiedler_hydro_priority_optimized.py`](run_overall_fiedler_hydro_priority_optimized.py)
-* **処理内容**: 固有値計算の重複処理を一括化し、精度を損なわずに計算速度を約7.5倍高速化（3試行が1分52秒で完了）。
+* **Core Engine Class: `PeptideAgent`** ([`peptide_agent.py`](peptide_agent.py))
+  * The unified core engine responsible for sequence/SMILES parsing, 3D conformer initialization, topology extraction, and real-time Laplacian Fiedler value calculation.
+  * **Supported Input Formats** (Auto-detected):
+    1. **1-Letter Amino Acid Sequences**: e.g., `YYDPETGTWY` (Chignolin), `NLYIQWLKDGGPSSGRPPPS` (Trp-cage)
+    2. **3-Letter Amino Acid Sequences**: e.g., `Tyr-Tyr-Asp-Pro-Glu-Thr-Gly-Thr-Trp-Tyr`
+    3. **SMILES Strings**: e.g., `CC(C)...` or arbitrary chemical SMILES representations.
+  * **Core Capabilities**:
+    * Molecule graph parsing and 3D initial conformer generation via RDKit ETKDGv3.
+    * Automatic identification of rotatable backbone/sidechain dihedral joints ($\phi, \psi$).
+    * Computation of graph Laplacian $L = D - A$ and algebraic connectivity ($\lambda_2$).
 
 ---
 
-## 3. 高分子（PNIPAM / NIPAゲル）シミュレーション
+### 2. Chignolin & Peptide Folding Simulation Models
 
-SMILES 形式で入力された高分子・ジェルの温度応答性脱水崩壊シミュレーション群です。
+Primary backend and runner scripts corresponding to the models published in our paper (Zenodo DOI: [`10.5281/zenodo.22743112`](https://doi.org/10.5281/zenodo.22743112)).
 
-* [`pnipam_differentiable_folding.py`](pnipam_differentiable_folding.py): PNIPAM（ポリN-イソプロピルアクリルアミド）鎖のFiedler最大化
-* [`pnipam_hybrid_folding.py`](pnipam_hybrid_folding.py): 物理反発＋Fiedler結合モデル
-* [`nipa_gel_simulation.py`](nipa_gel_simulation.py): NIPAゲルの架橋網目トポロジーシミュレーション
+* **① [Main Paper Model] Framework Model (Polar-Priority Phase Model)**:
+  * Backend: [`server_overall_fiedler_polar_priority.py`](server_overall_fiedler_polar_priority.py)
+  * Runner: [`run_overall_fiedler_polar_priority.py`](run_overall_fiedler_polar_priority.py)
+  * Input: Chignolin sequence (`YYDPETGTWY`) or corresponding SMILES.
+  * Mechanism: Phase 1 (Cycles 0–4) locks backbone hydrogen bonds to form $\beta$-sheet frameworks; Phase 2 (Cycles 5–9) unlocks hydrophobic core packing (Trp9, Tyr1, Tyr3).
+  * Output: Folded trajectory JSON ([`1uao_folded_directional.json`](1uao_folded_directional.json)) with radius of gyration $R_g = 5.12 \text{ \AA}$ (Experimental: $5.17 \text{ \AA}$).
+* **② Solvent-Direct Coupled Model**:
+  * Backend: [`server_overall_fiedler_solvent_direct.py`](server_overall_fiedler_solvent_direct.py)
+  * Runner: [`run_overall_fiedler_solvent_direct.py`](run_overall_fiedler_solvent_direct.py)
+  * Input: Peptide sequence + explicit water molecules ($O_w$).
+  * Mechanism: Directly maximizes the integrated Fiedler value $\lambda_2(G_{total})$ of the combined peptide-solvent hydration network.
+* **③ Topological Nucleation-Propagation Model**:
+  * Backend: [`server_overall_fiedler_nucleation.py`](server_overall_fiedler_nucleation.py)
+  * Runner: [`run_overall_fiedler_nucleation.py`](run_overall_fiedler_nucleation.py)
+  * Input: Trp-cage (20-mer: `NLYIQWLKDGGPSSGRPPPS`) or Chignolin.
+  * Mechanism: Locks early contacts as nucleation seeds, deterministically restricting degrees of freedom to scale to larger peptides (Trp-cage error < 1.9%).
+* **④ Optimized Hydrophobic-Priority Model**:
+  * Backend: [`server_overall_fiedler_hydro_priority_optimized.py`](server_overall_fiedler_hydro_priority_optimized.py)
+  * Runner: [`run_overall_fiedler_hydro_priority_optimized.py`](run_overall_fiedler_hydro_priority_optimized.py)
+  * Mechanism: Batch processes eigenvalue evaluations, achieving a ~7.5x acceleration (3 runs in 1 min 52 sec).
 
 ---
 
-## 4. 構造検証および 3D 可視化ツール
+### 3. Structural Evaluation & 3D WebGL Viewers
 
-### 構造検証：`calculate_rmsd.py` ([`calculate_rmsd.py`](calculate_rmsd.py))
-Kabsch アルゴリズムを用いて、シミュレーション出力 JSON の原子座標と、実験室 PDB ファイル（[`1UAO.pdb`](1UAO.pdb)、[`1L2Y.pdb`](1L2Y.pdb)）との間の **RMSD（構造重ね合わせ誤差）** を定量計算します。
-
-### 3D WebGL 可視化：`viewer.html` ([`viewer.html`](viewer.html))
-Three.js を用いてブラウザ上でリアルタイム 3D 表示を行うビューアです。
-* 機能: 折り畳み軌跡アニメーション再生、C-$\alpha$ バックボーン描画、水素結合破線描画、水分子ネットワーク表示。
+* **RMSD Structural Evaluation**: [`calculate_rmsd.py`](calculate_rmsd.py)
+  * Computes Root Mean Square Deviation (RMSD) between simulation output JSON coordinates and experimental PDB files ([`1UAO.pdb`](1UAO.pdb), [`1L2Y.pdb`](1L2Y.pdb)) using the Kabsch algorithm.
+* **Interactive 3D WebGL Viewer**: [`viewer.html`](viewer.html)
+  * Three.js WebGL viewer for real-time trajectory playback, C-$\alpha$ backbone tracing, hydrogen-bond rendering, and water network visualization.
 
 ---
 
-## 💻 実行手順の例
+## 🇯🇵 日本語ガイド (Japanese Guide)
 
-### 例1: チグノリン（SMILES または アミノ酸配列）のフォールディング実行
+### 1. コア・解析エンジン
+
+* **核心クラス：`PeptideAgent`** ([`peptide_agent.py`](peptide_agent.py))
+  * 入力解釈（SMILES、1文字アミノ酸 `YYDPETGTWY`、3文字アミノ酸 `Tyr-Tyr-...`）、3D構造初期化（RDKit ETKDGv3）、二面角ジョイント（$\phi, \psi$）抽出、および Fiedler値（$\lambda_2$）算出を行う核心クラス。
+
+### 2. チグノリン（Chignolin）および主要フォールディング・プログラム
+
+* **①【主論文モデル】水素結合優先段階モデル (Framework Model)**:
+  * スクリプト: [`run_overall_fiedler_polar_priority.py`](run_overall_fiedler_polar_priority.py)
+  * 主鎖水素結合（$\beta$シート骨格）を最優先ロック後、疎水コアをパッキング。慣性半径 $R_g = 5.12 \text{ \AA}$（実験値 $5.17 \text{ \AA}$）。
+* **② 水分子直接結合モデル (Solvent-Direct Coupled Model)**:
+  * スクリプト: [`run_overall_fiedler_solvent_direct.py`](run_overall_fiedler_solvent_direct.py)
+  * ペプチド＋水和水素結合ネットワーク全体の統合 Fiedler値を直接最大化。
+* **③ トポロジカル核形成伝播モデル (Nucleation-Propagation Model)**:
+  * スクリプト: [`run_overall_fiedler_nucleation.py`](run_overall_fiedler_nucleation.py)
+  * 長鎖ペプチド Trp-cage (20残基) に対応し、核形成により誤差 < 1.9% を達成。
+
+### 3. 構造検証および 3D 可視化ツール
+
+* **RMSD構造検証**: [`calculate_rmsd.py`](calculate_rmsd.py) (Kabschアルゴリズムによる実測PDBとの誤差計算)
+* **3D WebGL可視化**: [`viewer.html`](viewer.html) (Three.js による3D軌跡再生ツール)
+
+---
+
+## 💻 Execution Example (実行手順)
+
 ```bash
+# Run Chignolin Framework Folding Model
 python3 run_overall_fiedler_polar_priority.py
-```
 
-### 例2: 折り畳み構造と実験PDBとのRMSD計算
-```bash
+# Calculate RMSD against Experimental PDB (1UAO)
 python3 calculate_rmsd.py
 ```
