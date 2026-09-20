@@ -3,7 +3,7 @@ message: "If you use this software or reference the preprint, please cite it as 
 authors:
   - family-names: "Honda"
     given-names: "Yoshihiro"
-title: "Your_Repository_Name"
+title: "fiedler-water-folding-sim"
 version: "1.0.0"
 doi: "10.5281/zenodo.22743112"
 date-released: "2026-09-14"
