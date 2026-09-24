@@ -1,0 +1,58 @@
+[
+  {
+    "Compound": "Methanol",
+    "Chain_Length": 1,
+    "Exp_logP": -0.77,
+    "HLB": 18.0,
+    "FHI_Fiedler": 0.309
+  },
+  {
+    "Compound": "Ethanol",
+    "Chain_Length": 2,
+    "Exp_logP": -0.31,
+    "HLB": 16.5,
+    "FHI_Fiedler": 1.062
+  },
+  {
+    "Compound": "1-Propanol",
+    "Chain_Length": 3,
+    "Exp_logP": 0.25,
+    "HLB": 15.0,
+    "FHI_Fiedler": 2.553
+  },
+  {
+    "Compound": "1-Butanol",
+    "Chain_Length": 4,
+    "Exp_logP": 0.88,
+    "HLB": 13.5,
+    "FHI_Fiedler": 5.053
+  },
+  {
+    "Compound": "1-Hexanol",
+    "Chain_Length": 6,
+    "Exp_logP": 2.03,
+    "HLB": 10.5,
+    "FHI_Fiedler": 14.161
+  },
+  {
+    "Compound": "1-Octanol",
+    "Chain_Length": 8,
+    "Exp_logP": 3.0,
+    "HLB": 7.5,
+    "FHI_Fiedler": 30.57
+  },
+  {
+    "Compound": "Lauric Acid (C12)",
+    "Chain_Length": 12,
+    "Exp_logP": 4.6,
+    "HLB": 4.5,
+    "FHI_Fiedler": 44.769
+  },
+  {
+    "Compound": "Sodium Dodecyl Sulfate (SDS)",
+    "Chain_Length": 12,
+    "Exp_logP": 1.6,
+    "HLB": 40.0,
+    "FHI_Fiedler": 21.951
+  }
+]
