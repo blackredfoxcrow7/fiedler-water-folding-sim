@@ -1,0 +1,102 @@
+[
+  {
+    "Category": "Anionic Surfactant",
+    "Name": "SDS (Sodium Dodecyl Sulfate)",
+    "Total_Atoms": 42,
+    "Head_Atoms_(+)": 20,
+    "Tail_Atoms_(-)": 22,
+    "Head_Ratio_(%)": 47.6,
+    "Monomer_lambda2": 0.0164,
+    "FHI_Hydrophobicity": 21.951
+  },
+  {
+    "Category": "Anionic Surfactant",
+    "Name": "Sodium Laurate (Soap)",
+    "Total_Atoms": 37,
+    "Head_Atoms_(+)": 18,
+    "Tail_Atoms_(-)": 19,
+    "Head_Ratio_(%)": 48.6,
+    "Monomer_lambda2": 0.0212,
+    "FHI_Hydrophobicity": 42.381
+  },
+  {
+    "Category": "Cationic Surfactant",
+    "Name": "CTAB (Cetyltrimethylammonium)",
+    "Total_Atoms": 62,
+    "Head_Atoms_(+)": 31,
+    "Tail_Atoms_(-)": 31,
+    "Head_Ratio_(%)": 50.0,
+    "Monomer_lambda2": 0.0079,
+    "FHI_Hydrophobicity": 363.008
+  },
+  {
+    "Category": "Non-ionic Surfactant",
+    "Name": "Triton X-100 Head-Chain",
+    "Total_Atoms": 58,
+    "Head_Atoms_(+)": 23,
+    "Tail_Atoms_(-)": 35,
+    "Head_Ratio_(%)": 39.7,
+    "Monomer_lambda2": 0.0106,
+    "FHI_Hydrophobicity": 70.974
+  },
+  {
+    "Category": "Zwitterionic Surfactant",
+    "Name": "Lauryl Betaine",
+    "Total_Atoms": 52,
+    "Head_Atoms_(+)": 27,
+    "Tail_Atoms_(-)": 25,
+    "Head_Ratio_(%)": 51.9,
+    "Monomer_lambda2": 0.0116,
+    "FHI_Hydrophobicity": 69.029
+  },
+  {
+    "Category": "Membrane Phospholipid",
+    "Name": "DPPC (Dipalmitoylphosphatidylcholine)",
+    "Total_Atoms": 130,
+    "Head_Atoms_(+)": 78,
+    "Tail_Atoms_(-)": 52,
+    "Head_Ratio_(%)": 60.0,
+    "Monomer_lambda2": 0.0024,
+    "FHI_Hydrophobicity": 245.335
+  },
+  {
+    "Category": "Membrane Phospholipid",
+    "Name": "POPE (Phosphatidylethanolamine)",
+    "Total_Atoms": 108,
+    "Head_Atoms_(+)": 62,
+    "Tail_Atoms_(-)": 46,
+    "Head_Ratio_(%)": 57.4,
+    "Monomer_lambda2": 0.0033,
+    "FHI_Hydrophobicity": 140.565
+  },
+  {
+    "Category": "Steroid Membrane Lipid",
+    "Name": "Cholesterol",
+    "Total_Atoms": 79,
+    "Head_Atoms_(+)": 52,
+    "Tail_Atoms_(-)": 27,
+    "Head_Ratio_(%)": 65.8,
+    "Monomer_lambda2": 0.0129,
+    "FHI_Hydrophobicity": 325.2
+  },
+  {
+    "Category": "Barrier Sphingolipid",
+    "Name": "Ceramide (C16:0)",
+    "Total_Atoms": 105,
+    "Head_Atoms_(+)": 54,
+    "Tail_Atoms_(-)": 51,
+    "Head_Ratio_(%)": 51.4,
+    "Monomer_lambda2": 0.0028,
+    "FHI_Hydrophobicity": 452.955
+  },
+  {
+    "Category": "Bile Acid Surfactant",
+    "Name": "Sodium Cholates (Cholic Acid)",
+    "Total_Atoms": 68,
+    "Head_Atoms_(+)": 30,
+    "Tail_Atoms_(-)": 38,
+    "Head_Ratio_(%)": 44.1,
+    "Monomer_lambda2": 0.0228,
+    "FHI_Hydrophobicity": 31.54
+  }
+]
