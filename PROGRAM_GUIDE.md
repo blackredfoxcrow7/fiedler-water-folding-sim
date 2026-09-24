@@ -53,7 +53,11 @@ Primary backend and runner scripts corresponding to the models published in our 
 ### 3. Structural Evaluation & 3D WebGL Viewers
 
 * **RMSD Structural Evaluation**: [`calculate_rmsd.py`](calculate_rmsd.py)
-  * Computes Root Mean Square Deviation (RMSD) between simulation output JSON coordinates and experimental PDB files ([`1UAO.pdb`](1UAO.pdb), [`1L2Y.pdb`](1L2Y.pdb)) using the Kabsch algorithm.
+  * Computes Root Mean Square Deviation (RMSD) between simulation output JSON coordinates and experimental PDB files ([`1UAO.pdb`](1UAO.pdb), [`1L2Y.pdb`](1L2Y.pdb), [`5awl.pdb`](5awl.pdb)) using the Kabsch algorithm.
+* **Parameter Sensitivity Analysis**: [`rmsd_and_sensitivity_analysis.py`](rmsd_and_sensitivity_analysis.py)
+  * Evaluates model robustness against perturbations in covalent weight $w_{\text{cov}}$ ($\pm 20\%$) and distance cutoffs ($\pm 10\%$), proving RMSD stability (< 0.3% variance).
+* **Solubility Benchmark & Noise Tolerance Suite**: [`solubility_benchmark_and_noise_test.py`](solubility_benchmark_and_noise_test.py)
+  * Computes quantitative statistics ($RMSE = 0.076$, $MAE = 0.069$, $R^2 = 0.9982$) and evaluates Inverse Spectral Tomography under experimental noise ($0\% \sim 20\%$).
 * **Interactive 3D WebGL Viewer**: [`viewer.html`](viewer.html)
   * Three.js WebGL viewer for real-time trajectory playback, C-$\alpha$ backbone tracing, hydrogen-bond rendering, and water network visualization.
 
@@ -78,9 +82,11 @@ Primary backend and runner scripts corresponding to the models published in our 
   * スクリプト: [`run_overall_fiedler_nucleation.py`](run_overall_fiedler_nucleation.py)
   * 長鎖ペプチド Trp-cage (20残基) に対応し、核形成により誤差 < 1.9% を達成。
 
-### 3. 構造検証および 3D 可視化ツール
+### 3. 構造検証、査読評価用スイート、および 3D 可視化ツール
 
 * **RMSD構造検証**: [`calculate_rmsd.py`](calculate_rmsd.py) (Kabschアルゴリズムによる実測PDBとの誤差計算)
+* **パラメータ感度分析 (Sensitivity Analysis)**: [`rmsd_and_sensitivity_analysis.py`](rmsd_and_sensitivity_analysis.py) ($w_{\text{cov}}$ や距離カットオフを $\pm 20\%$ 変動させた場合の堅牢性検証)
+* **溶解度ベンチマーク＆ノイズ耐性検証**: [`solubility_benchmark_and_noise_test.py`](solubility_benchmark_and_noise_test.py) (RMSE, $R^2$ 統計検証およびノイズ下での構造復元率テスト)
 * **3D WebGL可視化**: [`viewer.html`](viewer.html) (Three.js による3D軌跡再生ツール)
 
 ---
@@ -93,4 +99,7 @@ python3 run_overall_fiedler_polar_priority.py
 
 # Calculate RMSD against Experimental PDB (1UAO)
 python3 calculate_rmsd.py
+
+# Run Parameter Sensitivity & Robustness Analysis
+python3 rmsd_and_sensitivity_analysis.py
 ```
