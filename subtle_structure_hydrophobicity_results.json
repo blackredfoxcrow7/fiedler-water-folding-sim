@@ -1,0 +1,42 @@
+[
+  {
+    "Case_Category": "Case 1: Alkyl Branching (C4 Alcohols)",
+    "Molecule_1": "1-Butanol (Linear)",
+    "FHI_1": 5.053,
+    "Exp_Sol_1_(g/L)": 73.0,
+    "Molecule_2": "tert-Butanol (Spherical)",
+    "FHI_2": 2.875,
+    "Exp_Sol_2_(g/L)": 1000.0,
+    "Fiedler_Prediction": "More Hydrophobic: 1-Butanol (Linear)"
+  },
+  {
+    "Case_Category": "Case 2: Cis vs Trans Isomers",
+    "Molecule_1": "Maleic Acid (cis)",
+    "FHI_1": 1.01,
+    "Exp_Sol_1_(g/L)": 788.0,
+    "Molecule_2": "Fumaric Acid (trans)",
+    "FHI_2": 1.01,
+    "Exp_Sol_2_(g/L)": 6.3,
+    "Fiedler_Prediction": "More Hydrophobic: Fumaric Acid (trans)"
+  },
+  {
+    "Case_Category": "Case 3: Regioisomers (Ortho vs Para)",
+    "Molecule_1": "Salicylic Acid (ortho)",
+    "FHI_1": 2.028,
+    "Exp_Sol_1_(g/L)": 2.2,
+    "Molecule_2": "p-Hydroxybenzoic Acid (para)",
+    "FHI_2": 2.144,
+    "Exp_Sol_2_(g/L)": 5.0,
+    "Fiedler_Prediction": "More Hydrophobic: p-Hydroxybenzoic Acid (para)"
+  },
+  {
+    "Case_Category": "Case 4: Cyclic vs Linear Alkane",
+    "Molecule_1": "n-Hexane (Linear)",
+    "FHI_1": 12.863,
+    "Exp_Sol_1_(g/L)": 0.0095,
+    "Molecule_2": "Cyclohexane (Cyclic)",
+    "FHI_2": 3.359,
+    "Exp_Sol_2_(g/L)": 0.055,
+    "Fiedler_Prediction": "More Hydrophobic: n-Hexane (Linear)"
+  }
+]
