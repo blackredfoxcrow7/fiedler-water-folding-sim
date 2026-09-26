@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Sodium Dodecanoate (Laurate)",
+    "smiles": "CCCCCCCCCCCC(=O)[O-]",
+    "head_atoms": 18,
+    "tail_atoms": 19,
+    "lambda2_monomer": 0.02123594996674531,
+    "lambda2_micelle": 0.82
+  },
+  {
+    "name": "Sodium Hexanoate",
+    "smiles": "CCCCCC(=O)[O-]",
+    "head_atoms": 9,
+    "tail_atoms": 10,
+    "lambda2_monomer": 0.07692966169668601,
+    "lambda2_micelle": 0.82
+  },
+  {
+    "name": "Sodium Dodecyl Sulfate (SDS)",
+    "smiles": "CCCCCCCCCCCCOS(=O)(=O)[O-]",
+    "head_atoms": 20,
+    "tail_atoms": 22,
+    "lambda2_monomer": 0.016399973660138234,
+    "lambda2_micelle": 0.82
+  }
+]
