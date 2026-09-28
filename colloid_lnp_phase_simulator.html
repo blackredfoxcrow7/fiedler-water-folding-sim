@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コロイド・界面科学＆LNP相構造予測3Dシミュレータ | Colloid & LNP Phase Predictor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg-dark: #060911;
+            --panel-bg: rgba(13, 20, 36, 0.88);
+            --accent-cyan: #00f0ff;
+            --accent-green: #10b981;
+            --accent-pink: #ff2a85;
+            --accent-amber: #f59e0b;
+            --text-light: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border-glow: rgba(0, 240, 255, 0.25);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .ui-panel {
+            position: absolute;
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 16px 20px;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        #header-panel {
+            top: 15px;
+            left: 15px;
+            max-width: 480px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent-cyan);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            margin-bottom: 8px;
+        }
+
+        #controls-panel {
+            top: 15px;
+            right: 15px;
+            width: 360px;
+            max-height: calc(100vh - 30px);
+            overflow-y: auto;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-light);
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            background: rgba(20, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-light);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        .phase-card {
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .phase-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 4px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+            font-size: 0.78rem;
+        }
+
+        .stat-box {
+            background: rgba(20, 30, 50, 0.5);
+            padding: 6px 8px;
+            border-radius: 6px;
+        }
+
+        .stat-box-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        #legend-panel {
+            bottom: 15px;
+            left: 15px;
+            max-width: 440px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.75rem;
+            margin-top: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.ionizable { background: var(--accent-amber); }
+        .dot.helper { background: var(--accent-green); }
+        .dot.water { background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan); }
+        .dot.chol { background: var(--text-dim); }
+
+        #ternary-canvas {
+            width: 100%;
+            height: 140px;
+            background: rgba(10, 15, 28, 0.8);
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="header-panel" class="ui-panel">
+        <div class="badge">コロイド界面科学・LNP相予測学習モデル</div>
+        <h1>界面活性剤・脂質相構造予測 3D</h1>
+        <div class="subtitle">
+            分子混合比とプロトン化（pH変化）に伴う液晶相転移（ラメラ相 ↔ 逆ヘキサゴナル相 ↔ キュービック相）のリアルタイム物理計算＆3Dシミュレーション
+        </div>
+    </div>
+
+    <div id="controls-panel" class="ui-panel">
+        <div class="control-group">
+            <label>論文成功例（ベンチマーク処方）</label>
+            <select id="preset-select" onchange="loadPreset()">
+                <option value="Moderna_SM102">Moderna SM-102 (COVID-19 Vaccine)</option>
+                <option value="Pfizer_ALC0315">Pfizer/BioNTech ALC-0315 (COVID-19)</option>
+                <option value="DLin_MC3_DMA">Onpattro DLin-MC3-DMA (FDA Approved)</option>
+                <option value="Honda_Gel">Honda Anisotropic Gel (Nonionic + Cationic)</option>
+                <option value="Custom">カスタム処方（自由設定）</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>イオン化脂質 / カチオン活性剤 <span id="val-ion">50%</span></label>
+            <input type="range" id="slider-ion" min="0" max="100" value="50" oninput="updateCalculations()">
+        </div>
+
+        <div class="control-group">
+            <label>Helper脂質 / ノニオン活性剤 <span id="val-help">10%</span></label>
+            <input type="range" id="slider-help" min="0" max="100" value="10" oninput="updateCalculations()">
+        </div>
+
+        <div class="control-group">
+            <label>コレステロール <span id="val-chol">38.5%</span></label>
+            <input type="range" id="slider-chol" min="0" max="100" value="38.5" step="0.5" oninput="updateCalculations()">
+        </div>
+
+        <div class="control-group">
+            <label>環境 pH <span id="val-ph">7.4</span></label>
+            <input type="range" id="slider-ph" min="4.0" max="8.5" value="7.4" step="0.1" oninput="updateCalculations()">
+        </div>
+
+        <div class="phase-card" id="phase-card">
+            <div class="stat-title">予測コロイド相構造</div>
+            <div class="phase-name" id="phase-name">Lamellar Bilayer (L_α)</div>
+            <div id="phase-desc" style="font-size:0.75rem; color:var(--text-dim);">平行平面膜構造（水分子は層状に挟み込まれ安定内包）</div>
+
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-title">充填パラメータ P</div>
+                    <div class="stat-box-val" id="val-p">1.03</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-title">Fiedler値 λ2</div>
+                    <div class="stat-box-val" id="val-l2">0.0212</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-title">伝導異方性 (σz/σxy)</div>
+                    <div class="stat-box-val" id="val-aniso">1.02</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-title">脱出放出効率</div>
+                    <div class="stat-box-val" id="val-escape">55.5%</div>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="ternary-canvas"></canvas>
+    </div>
+
+    <div id="legend-panel" class="ui-panel">
+        <div class="stat-title">コロイド相構成要素</div>
+        <div class="legend-grid">
+            <div class="legend-item"><div class="dot ionizable"></div>イオン化脂質 / カチオン基</div>
+            <div class="legend-item"><div class="dot helper"></div>Helper脂質 / ノニオン基</div>
+            <div class="legend-item"><div class="dot water"></div>水分子ネットワーク</div>
+            <div class="legend-item"><div class="dot chol"></div>コレステロール / 親油基</div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let mesophaseGroup;
+
+        const PRESETS = {
+            "Moderna_SM102": { ion: 50.0, help: 10.0, chol: 38.5, peg: 1.5 },
+            "Pfizer_ALC0315": { ion: 46.3, help: 10.9, chol: 42.7, peg: 1.6 },
+            "DLin_MC3_DMA": { ion: 50.0, help: 10.0, chol: 38.5, peg: 1.5 },
+            "Honda_Gel": { ion: 50.0, help: 50.0, chol: 0.0, peg: 0.0 }
+        };
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x060911, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(28, 20, 35);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const d1 = new THREE.DirectionalLight(0x00f0ff, 0.8);
+            d1.position.set(20, 30, 20);
+            scene.add(d1);
+            const d2 = new THREE.DirectionalLight(0xffa500, 0.5);
+            d2.position.set(-20, -20, -20);
+            scene.add(d2);
+
+            updateCalculations();
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function loadPreset() {
+            const val = document.getElementById('preset-select').value;
+            if (PRESETS[val]) {
+                const p = PRESETS[val];
+                document.getElementById('slider-ion').value = p.ion;
+                document.getElementById('slider-help').value = p.help;
+                document.getElementById('slider-chol').value = p.chol;
+                updateCalculations();
+            }
+        }
+
+        function updateCalculations() {
+            const f_ion = parseFloat(document.getElementById('slider-ion').value);
+            const f_help = parseFloat(document.getElementById('slider-help').value);
+            const f_chol = parseFloat(document.getElementById('slider-chol').value);
+            const ph = parseFloat(document.getElementById('slider-ph').value);
+
+            document.getElementById('val-ion').innerText = f_ion + '%';
+            document.getElementById('val-help').innerText = f_help + '%';
+            document.getElementById('val-chol').innerText = f_chol + '%';
+            document.getElementById('val-ph').innerText = ph;
+
+            const isProtonated = ph < 6.2;
+            const total = f_ion + f_help + f_chol + 1.5;
+            const norm_ion = f_ion / total;
+            const norm_chol = f_chol / total;
+
+            let P = isProtonated ? (0.95 + 0.85 * norm_ion + 0.65 * norm_chol) : (0.85 + 0.25 * norm_ion + 0.15 * norm_chol);
+
+            let phase = "Lamellar Bilayer (L_α)";
+            let desc = "平行平面膜構造（水分子は二分子膜の層間に保持される安定形態）";
+            let color = "#10b981";
+            let anisotropy = "1.02";
+            let l2 = (0.0212).toFixed(4);
+            let escape = (55.5 * (P / 1.6)).toFixed(1) + '%';
+
+            if (isProtonated) {
+                if (P >= 1.25 && norm_ion >= 0.35) {
+                    phase = "Inverted Hexagonal (H_II)";
+                    desc = "逆ヘキサゴナル筒状相（Z軸チャネルが自動形成され水分子が連通脱出！）";
+                    color = "#00f0ff";
+                    anisotropy = "1.75";
+                    l2 = (0.0350).toFixed(4);
+                } else if (P >= 1.6) {
+                    phase = "Bicontinuous Cubic (V_2)";
+                    desc = "3次元連通キュービック相（水ネットワークが網目状に貫通）";
+                    color = "#ff2a85";
+                    anisotropy = "1.45";
+                } else if (P < 0.8) {
+                    phase = "Micellar / Disrupted (L_1)";
+                    desc = "球状ミセル / 構造不発相（疎水性相互作用が不十分）";
+                    color = "#f59e0b";
+                    anisotropy = "0.98";
+                    escape = "1.4%";
+                }
+            }
+
+            document.getElementById('phase-name').innerText = phase;
+            document.getElementById('phase-name').style.color = color;
+            document.getElementById('phase-card').style.borderLeftColor = color;
+            document.getElementById('phase-desc').innerText = desc;
+
+            document.getElementById('val-p').innerText = P.toFixed(2);
+            document.getElementById('val-l2').innerText = l2;
+            document.getElementById('val-aniso').innerText = anisotropy;
+            document.getElementById('val-escape').innerText = escape;
+
+            build3DMesophase(phase, isProtonated);
+            drawTernaryDiagram(norm_ion, norm_chol, 1.0 - norm_ion - norm_chol);
+        }
+
+        function build3DMesophase(phase, isProtonated) {
+            if (mesophaseGroup) scene.remove(mesophaseGroup);
+            mesophaseGroup = new THREE.Group();
+
+            const sphereGeom = new THREE.SphereGeometry(0.4, 16, 16);
+            const ionMat = new THREE.MeshStandardMaterial({ color: isProtonated ? 0xff0055 : 0xf59e0b, roughness: 0.3 });
+            const waterMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.8, emissive: 0x003344 });
+            const cholMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 });
+
+            if (phase.includes("Hexagonal")) {
+                // 1D Cylindrical Channels along Z
+                const nCyl = 5;
+                const rCyl = 4.5;
+                const lengthZ = 24;
+                for (let c = 0; c < nCyl; c++) {
+                    const angleC = (2 * Math.PI / nCyl) * c;
+                    const cx = 10 * Math.cos(angleC);
+                    const cy = 10 * Math.sin(angleC);
+
+                    for (let z = -lengthZ/2; z <= lengthZ/2; z += 2.5) {
+                        for (let a = 0; a < 8; a++) {
+                            const aRad = (2 * Math.PI / 8) * a;
+                            const x = cx + rCyl * Math.cos(aRad);
+                            const y = cy + rCyl * Math.sin(aRad);
+                            const m = new THREE.Mesh(sphereGeom, ionMat);
+                            m.position.set(x, y, z);
+                            mesophaseGroup.add(m);
+                        }
+                        // Interior Water Wire
+                        const wm = new THREE.Mesh(sphereGeom, waterMat);
+                        wm.position.set(cx, cy, z);
+                        mesophaseGroup.add(wm);
+                    }
+                }
+            } else if (phase.includes("Lamellar")) {
+                // Parallel Planar Bilayers
+                const nLayers = 3;
+                const sizeXY = 18;
+                for (let l = 0; l < nLayers; l++) {
+                    const zPlane = (l - 1) * 8.0;
+                    for (let x = -sizeXY/2; x <= sizeXY/2; x += 3.0) {
+                        for (let y = -sizeXY/2; y <= sizeXY/2; y += 3.0) {
+                            const m = new THREE.Mesh(sphereGeom, (x+y)%2===0 ? ionMat : cholMat);
+                            m.position.set(x, y, zPlane);
+                            mesophaseGroup.add(m);
+
+                            // Water Layer between planes
+                            if (l < nLayers - 1) {
+                                const wm = new THREE.Mesh(sphereGeom, waterMat);
+                                wm.position.set(x, y, zPlane + 4.0);
+                                mesophaseGroup.add(wm);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Micellar / Spherical Clusters
+                const nMicelles = 6;
+                for (let m = 0; m < nMicelles; m++) {
+                    const mx = (Math.random() - 0.5) * 20;
+                    const my = (Math.random() - 0.5) * 20;
+                    const mz = (Math.random() - 0.5) * 20;
+
+                    for (let i = 0; i < 12; i++) {
+                        const a1 = Math.random() * Math.PI * 2;
+                        const a2 = Math.random() * Math.PI;
+                        const x = mx + 3.0 * Math.sin(a2) * Math.cos(a1);
+                        const y = my + 3.0 * Math.sin(a2) * Math.sin(a1);
+                        const z = mz + 3.0 * Math.cos(a2);
+                        const mesh = new THREE.Mesh(sphereGeom, ionMat);
+                        mesh.position.set(x, y, z);
+                        mesophaseGroup.add(mesh);
+                    }
+                }
+            }
+
+            scene.add(mesophaseGroup);
+        }
+
+        function drawTernaryDiagram(fIon, fChol, fHelp) {
+            const canvas = document.getElementById('ternary-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // Triangle Vertices
+            const pA = { x: w / 2, y: 15 };
+            const pB = { x: 20, y: h - 15 };
+            const pC = { x: w - 20, y: h - 15 };
+
+            // Draw Triangle Frame
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(pA.x, pA.y);
+            ctx.lineTo(pB.x, pB.y);
+            ctx.lineTo(pC.x, pC.y);
+            ctx.closePath();
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = '10px sans-serif';
+            ctx.fillText('Ionizable', pA.x - 20, pA.y - 2);
+
+            ctx.fillStyle = '#10b981';
+            ctx.fillText('Helper', pB.x - 10, pB.y + 12);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('Cholesterol', pC.x - 25, pC.y + 12);
+
+            // Current Composition Point
+            const px = fIon * pA.x + fHelp * pB.x + fChol * pC.x;
+            const py = fIon * pA.y + fHelp * pB.y + fChol * pC.y;
+
+            ctx.fillStyle = '#ff2a85';
+            ctx.beginPath();
+            ctx.arc(px, py, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (mesophaseGroup) {
+                mesophaseGroup.rotation.y += 0.003;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

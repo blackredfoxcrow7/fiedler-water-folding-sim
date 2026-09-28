@@ -1,0 +1,102 @@
+{
+  "Moderna_SM102": {
+    "metadata": {
+      "name": "Moderna SM-102 (COVID-19 Vaccine Formulation)",
+      "ratios": {
+        "ionizable": 50.0,
+        "helper": 10.0,
+        "cholesterol": 38.5,
+        "peg": 1.5
+      },
+      "pKa": 6.68,
+      "ref": "Corbett et al., Nature (2020)"
+    },
+    "ph_7_4": {
+      "phase": "Lamellar Bilayer (L_alpha)",
+      "lambda2": 0.02117038967588258,
+      "anisotropy": 1.02,
+      "packing_P": 1.03275
+    },
+    "ph_5_5": {
+      "phase": "Inverted Hexagonal (H_II)",
+      "lambda2": 0.035000165977675024,
+      "anisotropy": 1.75,
+      "packing_P": 1.61925
+    }
+  },
+  "Pfizer_ALC0315": {
+    "metadata": {
+      "name": "Pfizer/BioNTech ALC-0315 (COVID-19 Vaccine Formulation)",
+      "ratios": {
+        "ionizable": 46.3,
+        "helper": 10.9,
+        "cholesterol": 42.7,
+        "peg": 1.6
+      },
+      "pKa": 6.09,
+      "ref": "Vogel et al., Nature (2021)"
+    },
+    "ph_7_4": {
+      "phase": "Lamellar Bilayer (L_alpha)",
+      "lambda2": 0.010196435527610946,
+      "anisotropy": 1.02,
+      "packing_P": 1.0271428571428571
+    },
+    "ph_5_5": {
+      "phase": "Inverted Hexagonal (H_II)",
+      "lambda2": 0.01193337563751032,
+      "anisotropy": 1.75,
+      "packing_P": 1.6048768472906405
+    }
+  },
+  "DLin_MC3_DMA": {
+    "metadata": {
+      "name": "Onpattro DLin-MC3-DMA (FDA Approved LNP)",
+      "ratios": {
+        "ionizable": 50.0,
+        "helper": 10.0,
+        "cholesterol": 38.5,
+        "peg": 1.5
+      },
+      "pKa": 6.44,
+      "ref": "Akinc et al., Nat. Nanotechnol. (2019)"
+    },
+    "ph_7_4": {
+      "phase": "Lamellar Bilayer (L_alpha)",
+      "lambda2": 0.02117038967588258,
+      "anisotropy": 1.02,
+      "packing_P": 1.03275
+    },
+    "ph_5_5": {
+      "phase": "Inverted Hexagonal (H_II)",
+      "lambda2": 0.035000165977675024,
+      "anisotropy": 1.75,
+      "packing_P": 1.61925
+    }
+  },
+  "Honda_Gel_Surfactant": {
+    "metadata": {
+      "name": "Honda Anisotropic Gel (Nonionic + Cationic Assembly)",
+      "ratios": {
+        "ionizable": 50.0,
+        "helper": 50.0,
+        "cholesterol": 0.0,
+        "peg": 0.0
+      },
+      "pKa": 6.5,
+      "ref": "Honda Industrial Gel Fuel Cell Research"
+    },
+    "ph_7_4": {
+      "phase": "Lamellar Bilayer (L_alpha)",
+      "lambda2": 0.02117038967588258,
+      "anisotropy": 1.02,
+      "packing_P": 0.975
+    },
+    "ph_5_5": {
+      "phase": "Inverted Hexagonal (H_II)",
+      "lambda2": 0.035000165977675024,
+      "anisotropy": 1.75,
+      "packing_P": 1.375
+    }
+  }
+}
