@@ -1,0 +1,67 @@
+{
+  "Moderna SM-102 Standard (50:10:38.5:1.5)": {
+    "formulation": {
+      "Ionizable_Lipid_pct": 50.0,
+      "DSPC_pct": 10.0,
+      "Cholesterol_pct": 38.5,
+      "PEG_Lipid_pct": 1.5
+    },
+    "l2_pH_7_4": 0.010430912120162193,
+    "l2_pH_5_5": 0.023469552270365207,
+    "phase_jump_delta_l2": 0.013038640150203014,
+    "water_percolation_score": 2.4320041770504854,
+    "endosomal_escape_score_pct": 55.5
+  },
+  "Pfizer ALC-0315 Standard (46.3:10.9:42.7:1.6)": {
+    "formulation": {
+      "Ionizable_Lipid_pct": 45.61576354679803,
+      "DSPC_pct": 10.738916256157637,
+      "Cholesterol_pct": 42.06896551724138,
+      "PEG_Lipid_pct": 1.576354679802956
+    },
+    "l2_pH_7_4": 0.010430912120162193,
+    "l2_pH_5_5": 0.0188328542260431,
+    "phase_jump_delta_l2": 0.008401942105880907,
+    "water_percolation_score": 1.9515319089130296,
+    "endosomal_escape_score_pct": 35.61592303561735
+  },
+  "High Ionizable / Low Chol (70:10:15:5)": {
+    "formulation": {
+      "Ionizable_Lipid_pct": 70.0,
+      "DSPC_pct": 10.0,
+      "Cholesterol_pct": 15.0,
+      "PEG_Lipid_pct": 5.0
+    },
+    "l2_pH_7_4": 0.010430912120162193,
+    "l2_pH_5_5": 0.013634878399891857,
+    "phase_jump_delta_l2": 0.003203966279729664,
+    "water_percolation_score": 1.4128979044898577,
+    "endosomal_escape_score_pct": 11.057785238870807
+  },
+  "Low Ionizable / High DSPC (20:40:35:5)": {
+    "formulation": {
+      "Ionizable_Lipid_pct": 20.0,
+      "DSPC_pct": 40.0,
+      "Cholesterol_pct": 35.0,
+      "PEG_Lipid_pct": 5.0
+    },
+    "l2_pH_7_4": 0.010430912120162193,
+    "l2_pH_5_5": 0.010842236362887383,
+    "phase_jump_delta_l2": 0.00041132424272519,
+    "water_percolation_score": 1.1235137261824057,
+    "endosomal_escape_score_pct": 1.4195951962321485
+  },
+  "Excess PEG Lipid (45:10:35:10)": {
+    "formulation": {
+      "Ionizable_Lipid_pct": 45.0,
+      "DSPC_pct": 10.0,
+      "Cholesterol_pct": 35.0,
+      "PEG_Lipid_pct": 10.0
+    },
+    "l2_pH_7_4": 0.010430912120162193,
+    "l2_pH_5_5": 0.018783377517447873,
+    "phase_jump_delta_l2": 0.00835246539728568,
+    "water_percolation_score": 1.9464049443853906,
+    "endosomal_escape_score_pct": 19.21779871459046
+  }
+}
