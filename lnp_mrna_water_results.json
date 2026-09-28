@@ -1,0 +1,14 @@
+{
+  "ph_7_4_storage": {
+    "lambda2_global": 0.32397485415517135,
+    "lambda2_water_subgraph": 0.37536996866742595,
+    "water_percolation_index": 9.060669900080583,
+    "release_kinetic_factor": 3.401103376499138
+  },
+  "ph_5_5_endosomal": {
+    "lambda2_global": 0.1782204453456699,
+    "lambda2_water_subgraph": 0.13483385891198088,
+    "water_percolation_index": 7.475361615959411,
+    "release_kinetic_factor": 1.0079318534423085
+  }
+}
