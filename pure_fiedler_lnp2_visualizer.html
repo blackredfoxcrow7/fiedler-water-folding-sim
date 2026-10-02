@@ -6,13 +6,13 @@
     <title>Pure Fiedler Spectral Dynamics - LNP2 Mesophase Simulator</title>
     <style>
         :root {
-            --bg-color: #0c1220;
-            --panel-bg: rgba(16, 26, 46, 0.93);
-            --border-color: rgba(64, 196, 255, 0.3);
+            --bg-color: #0b111e;
+            --panel-bg: rgba(15, 25, 45, 0.94);
+            --border-color: rgba(0, 229, 255, 0.35);
             --accent-cyan: #00e5ff;
-            --accent-pink: #ff4081;
+            --accent-pink: #ff1744;
             --accent-gold: #ffd700;
-            --accent-water: #80deea;
+            --accent-water: #ffffff;
             --text-main: #f0f4f8;
             --text-muted: #9aaec4;
         }
@@ -31,7 +31,7 @@
         #sidebar {
             width: 440px;
             background: var(--panel-bg);
-            backdrop-filter: blur(14px);
+            backdrop-filter: blur(16px);
             border-right: 1px solid var(--border-color);
             padding: 18px;
             box-sizing: border-box;
@@ -40,13 +40,13 @@
             gap: 12px;
             z-index: 10;
             overflow-y: auto;
-            box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+            box-shadow: 5px 0 25px rgba(0,0,0,0.6);
         }
 
         #viewport-container {
             flex: 1;
             position: relative;
-            background: radial-gradient(circle at center, #16243d 0%, #070c18 100%);
+            background: radial-gradient(circle at center, #14223a 0%, #060a14 100%);
         }
 
         #canvas-3d {
@@ -60,7 +60,7 @@
             color: var(--accent-cyan);
             margin: 0 0 4px 0;
             letter-spacing: 0.5px;
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
         }
 
         .subtitle {
@@ -93,7 +93,7 @@
         select {
             width: 100%;
             padding: 7px;
-            background: #16243e;
+            background: #14223a;
             border: 1px solid var(--border-color);
             color: var(--text-main);
             border-radius: 6px;
@@ -145,10 +145,10 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #ff4081, #d81b60);
+            background: linear-gradient(135deg, #ff1744, #d50000);
             color: white;
             margin-top: 4px;
-            box-shadow: 0 2px 10px rgba(255, 64, 129, 0.4);
+            box-shadow: 0 2px 10px rgba(255, 23, 68, 0.5);
         }
 
         #hud-overlay {
@@ -159,7 +159,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 14px 18px;
-            width: 310px;
+            width: 320px;
             pointer-events: none;
             backdrop-filter: blur(12px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
@@ -180,8 +180,8 @@
         .structure-info-box {
             margin-top: 10px;
             padding: 8px 10px;
-            background: rgba(0, 229, 255, 0.07);
-            border: 1px solid rgba(0, 229, 255, 0.25);
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.3);
             border-radius: 6px;
             font-size: 0.78rem;
             color: var(--text-main);
@@ -195,23 +195,24 @@
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 0.78rem;
+            padding: 12px 16px;
+            font-size: 0.8rem;
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .legend-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
         }
     </style>
@@ -239,9 +240,9 @@
         <div class="control-group">
             <label for="layer-select">描画表示レイヤー切替:</label>
             <select id="layer-select">
-                <option value="ALL">🌟 全分子・ネットワーク（脂質＋水分子＋グラフエッジ＋mRNA）</option>
-                <option value="WATER">💧 水分子・水素結合ネットワークのみ (\lambda_2(Head-Water))</option>
-                <option value="LIPID">🧬 脂質二重層・メソ相骨格（親水頭部＋疎水尾部）</option>
+                <option value="ALL">🌟 全成分表示（頭部＋ピンク尾部＋白水分子＋金mRNA＋グラフ線）</option>
+                <option value="LIPID">🧬 脂質二重層・メソ相骨格（シアン頭部 ＋ マゼンタピンク尾部）</option>
+                <option value="WATER">💧 水分子・水素結合ネットワークのみ (純白球 H2O)</option>
                 <option value="GRAPH">⚡ Fiedler グラフ固有ベクトルエッジのみ</option>
             </select>
         </div>
@@ -257,9 +258,9 @@
             <div class="phase-badge" id="phase-badge">Inverse Hexagonal H_II</div>
         </div>
 
-        <div class="metric-card" style="border-left-color: var(--accent-pink);">
+        <div class="metric-card" style="border-left-color: #ff1744;">
             <div class="metric-label">Fiedler 曲率 \kappa_{\text{spec}} = \lambda_2(HW) - \lambda_2(TT)</div>
-            <div class="metric-value" id="kspec-display" style="color:var(--accent-pink)">+0.850</div>
+            <div class="metric-value" id="kspec-display" style="color:#ff1744">+0.850</div>
         </div>
 
         <div class="control-group">
@@ -272,7 +273,7 @@
         <div class="control-group">
             <div style="font-size:0.76rem; color:var(--text-muted); line-height:1.35;">
                 <strong style="color:var(--text-main);">Fiedler グラフ理論による解釈:</strong><br>
-                親水頭部-水分子ネットワークの接続度 $\lambda_2(\text{HW})$ と疎水尾部剛性 $\lambda_2(\text{TT})$ の比率 $\mathcal{F}_{\text{spec}}$ で水分子配位・相転移・膜破砕を統一記述。
+                親水頭部-水分子接続度 $\lambda_2(\text{HW})$ と疎水尾部剛性 $\lambda_2(\text{TT})$ の比率 $\mathcal{F}_{\text{spec}}$ で水分子配位・相転移・膜破砕を統一記述。
             </div>
         </div>
     </div>
@@ -283,27 +284,22 @@
         <div id="hud-overlay">
             <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:10px; font-size:0.92rem; border-bottom:1px solid rgba(0,229,255,0.2); padding-bottom:4px;">Fiedler グラフスペクトル HUD</div>
             <div class="hud-row"><span>\lambda_2(\text{Head-Water}):</span><span class="hud-val" id="l2hw-hud" style="color:#00e5ff">2.45</span></div>
-            <div class="hud-row"><span>\lambda_2(\text{Tail-Tail}):</span><span class="hud-val" id="l2tt-hud" style="color:#ff4081">1.82</span></div>
+            <div class="hud-row"><span>\lambda_2(\text{Tail-Tail}):</span><span class="hud-val" id="l2tt-hud" style="color:#ff1744">1.82</span></div>
             <div class="hud-row"><span>Cheeger 下限 h(G):</span><span class="hud-val" id="cheeger-hud" style="color:#ffd700">1.22</span></div>
             <div class="hud-row"><span>膜融合能 Fusogenic:</span><span class="hud-val" id="fuso-hud" style="color:#00ff88">98%</span></div>
             
             <div class="structure-info-box" id="struct-info-box">
-                <strong style="color:var(--accent-gold);">[pH ≤ 6.2 描画構造解説]</strong><br>
-                ・<strong>逆ヘキサゴナル相 ($H_{II}$) / バイコンティニュアス相 ($Q_2$)</strong><br>
-                ・プロトン化脂質 ($NH^+$) が中央水チャンネルの内壁を円筒状に包囲。<br>
-                ・水分子 ($H_2O$) が円筒管の中心に密集・一列配位。<br>
-                ・高密度 Fiedler 水素結合枝 ($\lambda_2 \uparrow$) が水チャンネルを強力連結。<br>
-                ・アニオン膜と融合ストークを形成し mRNA 爆発的脱出が進行中。
+                <!-- Dynamic text populated by JavaScript -->
             </div>
         </div>
 
         <div class="legend-box">
-            <div style="font-weight:700; color:var(--text-main); margin-bottom:2px;">分子・ネットワーク凡例</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#00e5ff"></div><span>脂質親水性頭部 ($N/NH^+$)</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#ff4081"></div><span>疎水性アルキル尾部 (乾燥コア)</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#80deea"></div><span>水分子 ($H_2O$ 水和圏・極性流路)</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#ffd700"></div><span>mRNA 核酸ペロード</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#00e5ff; height:2px; border-radius:0;"></div><span>Fiedler 水素結合グラフエッジ ($\lambda_2$)</span></div>
+            <div style="font-weight:700; color:var(--text-main); margin-bottom:4px;">分子・ネットワークカラー凡例</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00e5ff; box-shadow:0 0 6px #00e5ff"></div><span>青（Cyan）: 脂質親水性頭部 ($NH^+$)</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff1744; box-shadow:0 0 6px #ff1744"></div><span>ピンク（Pink）: 疎水性アルキル尾部 (乾燥コア)</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ffffff; box-shadow:0 0 6px #ffffff"></div><span>純白（White）: 水分子 ($H_2O$ 極性流路)</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ffd700; box-shadow:0 0 6px #ffd700"></div><span>金色（Gold）: mRNA 核酸ペロード</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00e5ff; height:2px; border-radius:0;"></div><span>青細線: Fiedler 水素結合グラフ ($\lambda_2$)</span></div>
         </div>
     </div>
 
@@ -317,33 +313,32 @@
         function initThreeJS() {
             const container = document.getElementById('viewport-container');
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x0c1220, 0.010);
+            scene.fog = new THREE.FogExp2(0x0b111e, 0.010);
 
             camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
             
-            // Shifted Camera Target UPWARD so rendering is elevated in viewport!
-            camera.position.set(0, 16, 42);
-            camera.lookAt(0, 5, 0);
+            // Shifted Camera Position & Target UPWARD for optimal framing
+            camera.position.set(0, 18, 44);
+            camera.lookAt(0, 5.5, 0);
 
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas-3d'), antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
 
-            // Multi-Directional Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+            // Multi-Directional Bright Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
             scene.add(ambientLight);
 
-            const mainLight = new THREE.DirectionalLight(0x00e5ff, 1.6);
+            const mainLight = new THREE.DirectionalLight(0x00e5ff, 1.8);
             mainLight.position.set(30, 50, 30);
             scene.add(mainLight);
 
-            const fillLight = new THREE.DirectionalLight(0xff4081, 1.1);
+            const fillLight = new THREE.DirectionalLight(0xff1744, 1.4);
             fillLight.position.set(-30, -10, -20);
             scene.add(fillLight);
 
             particleGroup = new THREE.Group();
-            // Elevate particle group vertically UPWARD (y = +4.5)
-            particleGroup.position.set(0, 4.5, 0);
+            particleGroup.position.set(0, 5.0, 0);
             scene.add(particleGroup);
 
             window.addEventListener('resize', () => {
@@ -363,17 +358,18 @@
                 particleGroup.remove(particleGroup.children[0]); 
             }
 
-            const numLipids = 260;
-            const headGeo = new THREE.SphereGeometry(0.55, 14, 14);
-            const tailGeo = new THREE.CylinderGeometry(0.16, 0.16, 2.2, 8);
-            const waterGeo = new THREE.SphereGeometry(0.32, 10, 10);
-            const mrnaGeo = new THREE.SphereGeometry(0.45, 12, 12);
+            const numLipids = 280;
+            const headGeo = new THREE.SphereGeometry(0.60, 16, 16);
+            const tailGeo = new THREE.CylinderGeometry(0.24, 0.24, 2.6, 10);
+            const waterGeo = new THREE.SphereGeometry(0.38, 12, 12);
+            const mrnaGeo = new THREE.SphereGeometry(0.50, 14, 14);
 
-            const headMat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, shininess: 90, emissive: 0x003344 });
-            const tailMat = new THREE.MeshPhongMaterial({ color: 0xff4081, shininess: 50, emissive: 0x330015 });
-            const waterMat = new THREE.MeshPhongMaterial({ color: 0x80deea, transparent: true, opacity: 0.85, shininess: 100 });
-            const mrnaMat = new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 100, emissive: 0x443300 });
-            const edgeMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.4 });
+            // High-Contrast Materials
+            const headMat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, shininess: 120, emissive: 0x004466 });
+            const tailMat = new THREE.MeshPhongMaterial({ color: 0xff1744, shininess: 80, emissive: 0x660011 });
+            const waterMat = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.92, shininess: 120, emissive: 0x222222 });
+            const mrnaMat = new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 120, emissive: 0x554400 });
+            const edgeMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.35 });
 
             const showLipids = (layerMode === 'ALL' || layerMode === 'LIPID');
             const showWater = (layerMode === 'ALL' || layerMode === 'WATER');
@@ -384,7 +380,7 @@
 
             if (F_spec < 0.85) {
                 // Lamellar / Spherical Vesicle (F_spec < 0.85)
-                const radius = 12.5;
+                const radius = 13.0;
                 for(let i=0; i<numLipids; i++) {
                     const phi = Math.acos(-1 + (2 * i) / numLipids);
                     const theta = Math.sqrt(numLipids * Math.PI) * phi;
@@ -400,7 +396,7 @@
 
                         const normal = new THREE.Vector3(hx, hy, hz).normalize();
                         const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                        tailMesh.position.set(hx - normal.x * 1.2, hy - normal.y * 1.2, hz - normal.z * 1.2);
+                        tailMesh.position.set(hx - normal.x * 1.4, hy - normal.y * 1.4, hz - normal.z * 1.4);
                         tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
                         particleGroup.add(headMesh);
@@ -409,7 +405,7 @@
 
                     // Water molecules around outer hydration shell
                     if (showWater) {
-                        const wr = radius + 1.8 + Math.sin(i * 3) * 0.8;
+                        const wr = radius + 2.0 + Math.sin(i * 3) * 0.8;
                         const wx = wr * Math.sin(phi) * Math.cos(theta + 0.1);
                         const wy = wr * Math.sin(phi) * Math.sin(theta + 0.1);
                         const wz = wr * Math.cos(phi);
@@ -424,8 +420,8 @@
 
                 // Internal mRNA in polar cavity center
                 if (showLipids || layerMode === 'ALL') {
-                    for(let m=0; m<25; m++) {
-                        const mr = Math.random() * 4.0;
+                    for(let m=0; m<28; m++) {
+                        const mr = Math.random() * 4.2;
                         const mtheta = Math.random() * Math.PI * 2;
                         const mphi = Math.random() * Math.PI;
                         const mrnaMesh = new THREE.Mesh(mrnaGeo, mrnaMat);
@@ -438,14 +434,14 @@
                 // Inverse Micellar Cubic Fd3m (0.85 <= F_spec < 1.15)
                 const micelleCount = 8;
                 for(let m=0; m<micelleCount; m++) {
-                    const cx = (m % 2 === 0 ? 1 : -1) * 8.5;
-                    const cy = (Math.floor(m / 2) % 2 === 0 ? 1 : -1) * 8.5;
-                    const cz = (m >= 4 ? 1 : -1) * 8.5;
+                    const cx = (m % 2 === 0 ? 1 : -1) * 9.0;
+                    const cy = (Math.floor(m / 2) % 2 === 0 ? 1 : -1) * 9.0;
+                    const cz = (m >= 4 ? 1 : -1) * 9.0;
 
-                    for(let i=0; i<20; i++) {
+                    for(let i=0; i<22; i++) {
                         const theta = Math.random() * Math.PI * 2;
                         const phi = Math.random() * Math.PI;
-                        const r = 3.6;
+                        const r = 3.8;
 
                         const hx = cx + r * Math.sin(phi) * Math.cos(theta);
                         const hy = cy + r * Math.sin(phi) * Math.sin(theta);
@@ -459,7 +455,7 @@
 
                             const dir = new THREE.Vector3(hx - cx, hy - cy, hz - cz).normalize();
                             const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                            tailMesh.position.set(hx + dir.x * 1.1, hy + dir.y * 1.1, hz + dir.z * 1.1);
+                            tailMesh.position.set(hx + dir.x * 1.3, hy + dir.y * 1.3, hz + dir.z * 1.3);
                             tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
 
                             particleGroup.add(headMesh);
@@ -467,7 +463,7 @@
                         }
 
                         if (showWater) {
-                            const wr = 1.6;
+                            const wr = 1.8;
                             const wx = cx + wr * Math.sin(phi) * Math.cos(theta);
                             const wy = cy + wr * Math.sin(phi) * Math.sin(theta);
                             const wz = cz + wr * Math.cos(phi);
@@ -484,11 +480,11 @@
                 // Inverse Hexagonal H_II (1.15 <= F_spec < 1.45)
                 const tubeCount = 5;
                 for(let t=0; t<tubeCount; t++) {
-                    const tx = (t - 2) * 7.5;
+                    const tx = (t - 2) * 8.0;
                     for(let i=0; i<45; i++) {
                         const angle = (i / 45) * Math.PI * 2;
-                        const z = ((i % 9) - 4.5) * 3.2;
-                        const r = 3.2;
+                        const z = ((i % 9) - 4.5) * 3.4;
+                        const r = 3.4;
 
                         const hx = tx + r * Math.cos(angle);
                         const hy = r * Math.sin(angle);
@@ -500,9 +496,10 @@
                             const headMesh = new THREE.Mesh(headGeo, headMat);
                             headMesh.position.copy(hpos);
 
+                            // Radiation dir for pink tails pointing outward into dry matrix
                             const dir = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
                             const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                            tailMesh.position.set(hx + dir.x * 1.1, hy + dir.y * 1.1, hz);
+                            tailMesh.position.set(hx + dir.x * 1.3, hy + dir.y * 1.3, hz);
                             tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
 
                             particleGroup.add(headMesh);
@@ -510,7 +507,8 @@
                         }
 
                         if (showWater) {
-                            const wr = 1.4;
+                            // Pure white water molecules inside central water cylinder
+                            const wr = 1.5;
                             const wx = tx + wr * Math.cos(angle);
                             const wy = wr * Math.sin(angle);
                             const wpos = new THREE.Vector3(wx, wy, hz);
@@ -524,12 +522,12 @@
                 }
             } else {
                 // Bicontinuous Cubic Q_2 (F_spec >= 1.45)
-                for(let i=0; i<200; i++) {
-                    const u = (i / 200) * Math.PI * 4;
+                for(let i=0; i<220; i++) {
+                    const u = (i / 220) * Math.PI * 4;
                     const v = (i % 20) / 20 * Math.PI * 2;
-                    const hx = 11 * Math.sin(u) * Math.cos(v);
-                    const hy = 11 * Math.sin(u) * Math.sin(v);
-                    const hz = 11 * Math.cos(u);
+                    const hx = 11.5 * Math.sin(u) * Math.cos(v);
+                    const hy = 11.5 * Math.sin(u) * Math.sin(v);
+                    const hz = 11.5 * Math.cos(u);
                     const hpos = new THREE.Vector3(hx, hy, hz);
                     headPositions.push(hpos);
 
@@ -537,10 +535,17 @@
                         const headMesh = new THREE.Mesh(headGeo, headMat);
                         headMesh.position.copy(hpos);
                         particleGroup.add(headMesh);
+
+                        // Added missing Pink Tail Rods in Q_2 phase!
+                        const dir = new THREE.Vector3(hx, hy, hz).normalize();
+                        const tailMesh = new THREE.Mesh(tailGeo, tailMat);
+                        tailMesh.position.set(hx + dir.x * 1.3, hy + dir.y * 1.3, hz + dir.z * 1.3);
+                        tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+                        particleGroup.add(tailMesh);
                     }
 
                     if (showWater) {
-                        const wpos = new THREE.Vector3(hx * 0.85, hy * 0.85, hz * 0.85);
+                        const wpos = new THREE.Vector3(hx * 0.82, hy * 0.82, hz * 0.82);
                         waterPositions.push(wpos);
                         const waterMesh = new THREE.Mesh(waterGeo, waterMat);
                         waterMesh.position.copy(wpos);
@@ -551,12 +556,12 @@
 
             // Draw Fiedler Graph Edges (Hydrogen Bonding / Network Laplacian Connectivity)
             if (showGraph && headPositions.length > 0 && waterPositions.length > 0) {
-                const maxEdges = 140;
+                const maxEdges = 120;
                 let edgeCount = 0;
                 for(let i=0; i<headPositions.length; i++) {
                     for(let j=0; j<waterPositions.length; j++) {
                         const dist = headPositions[i].distanceTo(waterPositions[j]);
-                        if (dist < 4.5 && edgeCount < maxEdges) {
+                        if (dist < 4.2 && edgeCount < maxEdges) {
                             const points = [headPositions[i], waterPositions[j]];
                             const edgeGeo = new THREE.BufferGeometry().setFromPoints(points);
                             const line = new THREE.Line(edgeGeo, edgeMat);
@@ -628,17 +633,17 @@
             // Dynamic HUD explanation for pH <= 6.2
             const infoBox = document.getElementById('struct-info-box');
             if (currentpH <= 6.2) {
-                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 描画構造解説]</strong><br>' +
-                    '・<strong>逆ヘキサゴナル相 (H_II) / バイコンティニュアス相 (Q_2)</strong><br>' +
-                    '・プロトン化脂質 (NH+) が中央水チャンネルの内壁を円筒状に包囲。<br>' +
-                    '・水分子 (H2O) が円筒管の中心に密集・一列配位。<br>' +
-                    '・高密度 Fiedler 水素結合枝 (λ2 ↑) が水チャンネルを強力連結。<br>' +
-                    '・アニオン膜と融合ストークを形成し mRNA 爆発的脱出が進行中。';
+                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 低pH高曲率相]</strong><br>' +
+                    '・<strong>逆ヘキサゴナル (H_II) / バイコンティニュアス (Q_2) 相</strong><br>' +
+                    '・<strong>青球 ($NH^+$)</strong>: プロトン化頭部が水管内壁を包囲<br>' +
+                    '・<strong>ピンク柱 (Tails)</strong>: 疎水性尾部が放射状に乾燥コアを構築<br>' +
+                    '・<strong>純白球 ($H_2O$)</strong>: 中心水チャンネルの密集流路<br>' +
+                    '・<strong>金球 (mRNA)</strong>: エンドソーム膜破砕に伴う細胞質脱出';
             } else {
-                infoBox.innerHTML = '<strong style="color:var(--accent-cyan);">[pH 7.4〜6.3 描画構造解説]</strong><br>' +
-                    '・<strong>逆ミセル相 (Fd3m) / 二重層ベシクル相 (L_α)</strong><br>' +
-                    '・非電荷脂質が外側で油状コア・シェルを被覆。<br>' +
-                    '・水分子は内部極性キャビティに局所分散・隔離。';
+                infoBox.innerHTML = '<strong style="color:var(--accent-cyan);">[pH 7.4〜6.3 中性構造]</strong><br>' +
+                    '・<strong>逆ミセル相 (Fd3m) / ベシクル相 (L_α)</strong><br>' +
+                    '・非電荷脂質が油状コア・外被単分子膜を被覆。<br>' +
+                    '・水分子は内部キャビティに隔離配位。';
             }
 
             // Chart update
