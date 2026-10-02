@@ -6,12 +6,13 @@
     <title>Pure Fiedler Spectral Dynamics - LNP2 Mesophase Simulator</title>
     <style>
         :root {
-            --bg-color: #0d1322;
-            --panel-bg: rgba(18, 28, 48, 0.92);
+            --bg-color: #0c1220;
+            --panel-bg: rgba(16, 26, 46, 0.93);
             --border-color: rgba(64, 196, 255, 0.3);
             --accent-cyan: #00e5ff;
             --accent-pink: #ff4081;
             --accent-gold: #ffd700;
+            --accent-water: #80deea;
             --text-main: #f0f4f8;
             --text-muted: #9aaec4;
         }
@@ -32,11 +33,11 @@
             background: var(--panel-bg);
             backdrop-filter: blur(14px);
             border-right: 1px solid var(--border-color);
-            padding: 20px;
+            padding: 18px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
             z-index: 10;
             overflow-y: auto;
             box-shadow: 5px 0 25px rgba(0,0,0,0.5);
@@ -45,7 +46,7 @@
         #viewport-container {
             flex: 1;
             position: relative;
-            background: radial-gradient(circle at center, #152238 0%, #080d1a 100%);
+            background: radial-gradient(circle at center, #16243d 0%, #070c18 100%);
         }
 
         #canvas-3d {
@@ -55,7 +56,7 @@
         }
 
         h1 {
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             color: var(--accent-cyan);
             margin: 0 0 4px 0;
             letter-spacing: 0.5px;
@@ -63,23 +64,23 @@
         }
 
         .subtitle {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .control-group {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px 12px;
         }
 
         .control-group label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
+            font-size: 0.83rem;
+            margin-bottom: 5px;
             font-weight: 600;
         }
 
@@ -91,25 +92,24 @@
 
         select {
             width: 100%;
-            padding: 8px;
+            padding: 7px;
             background: #16243e;
             border: 1px solid var(--border-color);
             color: var(--text-main);
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             outline: none;
         }
 
         .metric-card {
             background: rgba(0, 229, 255, 0.08);
             border-left: 4px solid var(--accent-cyan);
-            padding: 12px 14px;
+            padding: 10px 12px;
             border-radius: 0 8px 8px 0;
-            margin-top: 4px;
         }
 
         .metric-value {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--accent-cyan);
             font-family: monospace;
@@ -117,7 +117,7 @@
         }
 
         .metric-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             text-transform: uppercase;
             font-weight: 600;
@@ -125,10 +125,10 @@
 
         .chart-container {
             width: 100%;
-            height: 170px;
+            height: 155px;
             background: rgba(0, 0, 0, 0.4);
             border-radius: 6px;
-            padding: 8px;
+            padding: 6px;
             box-sizing: border-box;
             position: relative;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -141,13 +141,13 @@
 
         .phase-badge {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 700;
             background: linear-gradient(135deg, #ff4081, #d81b60);
             color: white;
-            margin-top: 6px;
+            margin-top: 4px;
             box-shadow: 0 2px 10px rgba(255, 64, 129, 0.4);
         }
 
@@ -158,7 +158,7 @@
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 14px 18px;
             width: 290px;
             pointer-events: none;
             backdrop-filter: blur(12px);
@@ -168,24 +168,51 @@
         .hud-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.88rem;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
         }
 
         .hud-val {
             font-family: monospace;
             font-weight: 700;
         }
+
+        .legend-box {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.78rem;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
 
     <div id="sidebar">
         <div>
             <h1>Pure Fiedler Spectral Dynamics</h1>
-            <div class="subtitle">LNP2 Endosomal Escape driven purely by Graph Laplacian \lambda_2</div>
+            <div class="subtitle">LNP2 Mesophase & Water Network Simulator</div>
         </div>
 
         <div class="control-group">
@@ -195,6 +222,16 @@
                 <option value="DLinDMA">DLinDMA (高水和・格子遅延・低脱出)</option>
                 <option value="ALC-0315 (S,S)">ALC-0315 (S,S) (低毒性・高転送効率)</option>
                 <option value="ALC-0315 (R,R)">ALC-0315 (R,R) (Cheegerボトルネック・細胞毒性)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="layer-select">描画表示レイヤー切替:</label>
+            <select id="layer-select">
+                <option value="ALL">🌟 全分子・ネットワーク（脂質＋水分子＋グラフエッジ＋mRNA）</option>
+                <option value="WATER">💧 水分子・水素結合ネットワークのみ (\lambda_2(Head-Water))</option>
+                <option value="LIPID">🧬 脂質二重層・メソ相骨格（親水基＋疎水尾部）</option>
+                <option value="GRAPH">⚡ Fiedler グラフ固有ベクトルエッジのみ</option>
             </select>
         </div>
 
@@ -215,33 +252,43 @@
         </div>
 
         <div class="control-group">
-            <div style="font-size:0.82rem; font-weight:700; margin-bottom:6px; color:var(--accent-cyan)">pH 依存 Fiedler スペクトル軌跡</div>
+            <div style="font-size:0.8rem; font-weight:700; margin-bottom:4px; color:var(--accent-cyan)">pH 依存 Fiedler スペクトル軌跡</div>
             <div class="chart-container">
                 <canvas id="fiedlerChart" class="chart-canvas"></canvas>
             </div>
         </div>
 
         <div class="control-group">
-            <div style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">
-                <strong style="color:var(--text-main);">Fiedler グラフスペクトル理論:</strong><br>
-                P パラメーターを排出し、親水性頭部-水分子の代数的接続度 $\lambda_2(	ext{Head-Water})$ と疎水性尾部剛性 $\lambda_2(	ext{Tail-Tail})$ の比率 $\mathcal{F}_{	ext{spec}}$ で液晶メソ相と膜融合能を直接記述。
+            <div style="font-size:0.76rem; color:var(--text-muted); line-height:1.35;">
+                <strong style="color:var(--text-main);">Fiedler グラフ理論による解釈:</strong><br>
+                親水頭部-水分子ネットワークの接続度 $\lambda_2(	ext{HW})$ と疎水尾部剛性 $\lambda_2(	ext{TT})$ の比率 $\mathcal{F}_{	ext{spec}}$ で水分子配位・相転移・膜破砕を統一記述。
             </div>
         </div>
     </div>
 
     <div id="viewport-container">
         <canvas id="canvas-3d"></canvas>
+        
         <div id="hud-overlay">
-            <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:12px; font-size:0.95rem; border-bottom:1px solid rgba(0,229,255,0.2); padding-bottom:6px;">Fiedler グラフスペクトル HUD</div>
+            <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:10px; font-size:0.92rem; border-bottom:1px solid rgba(0,229,255,0.2); padding-bottom:4px;">Fiedler グラフスペクトル HUD</div>
             <div class="hud-row"><span>\lambda_2(	ext{Head-Water}):</span><span class="hud-val" id="l2hw-hud" style="color:#00e5ff">2.45</span></div>
             <div class="hud-row"><span>\lambda_2(	ext{Tail-Tail}):</span><span class="hud-val" id="l2tt-hud" style="color:#ff4081">1.82</span></div>
             <div class="hud-row"><span>Cheeger 下限 h(G):</span><span class="hud-val" id="cheeger-hud" style="color:#ffd700">1.22</span></div>
             <div class="hud-row"><span>膜融合能 Fusogenic:</span><span class="hud-val" id="fuso-hud" style="color:#00ff88">98%</span></div>
         </div>
+
+        <div class="legend-box">
+            <div style="font-weight:700; color:var(--text-main); margin-bottom:2px;">分子・ネットワーク凡例</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00e5ff"></div><span>脂質親水性頭部 ($N/NH^+$)</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff4081"></div><span>疎水性アルキル尾部 (乾燥コア)</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#80deea"></div><span>水分子 ($H_2O$ 水和圏・極性流路)</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ffd700"></div><span>mRNA 核酸ペロード</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00e5ff; height:2px; border-radius:0;"></div><span>Fiedler 水素結合グラフエッジ ($\lambda_2$)</span></div>
+        </div>
     </div>
 
     <script>
-        // Directly embedded JSON dataset to guarantee zero CORS / local file fetch issues
+        // Embedded JSON Dataset
         const spectralData = {"MC3": [{"pH": 7.4, "lambda_2_head_water": 3.3645, "lambda_2_tail_tail": 3.6752, "F_spec": 0.9154, "kappa_spec": -0.3108, "cheeger_bound": 1.6822, "bottleneck_index": 0.0797, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.3, "lambda_2_head_water": 3.4304, "lambda_2_tail_tail": 3.6752, "F_spec": 0.9334, "kappa_spec": -0.2448, "cheeger_bound": 1.7152, "bottleneck_index": 0.0792, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.2, "lambda_2_head_water": 3.5084, "lambda_2_tail_tail": 3.6752, "F_spec": 0.9546, "kappa_spec": -0.1668, "cheeger_bound": 1.7542, "bottleneck_index": 0.0785, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.1, "lambda_2_head_water": 3.6004, "lambda_2_tail_tail": 3.6752, "F_spec": 0.9796, "kappa_spec": -0.0748, "cheeger_bound": 1.8002, "bottleneck_index": 0.0778, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.0, "lambda_2_head_water": 3.7088, "lambda_2_tail_tail": 3.6752, "F_spec": 1.0091, "kappa_spec": 0.0335, "cheeger_bound": 1.8544, "bottleneck_index": 0.077, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 6.9, "lambda_2_head_water": 3.8359, "lambda_2_tail_tail": 3.6752, "F_spec": 1.0437, "kappa_spec": 0.1607, "cheeger_bound": 1.918, "bottleneck_index": 0.0761, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 6.8, "lambda_2_head_water": 3.9846, "lambda_2_tail_tail": 3.6752, "F_spec": 1.0842, "kappa_spec": 0.3094, "cheeger_bound": 1.9923, "bottleneck_index": 0.0751, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 6.7, "lambda_2_head_water": 4.1573, "lambda_2_tail_tail": 3.6752, "F_spec": 1.1312, "kappa_spec": 0.4821, "cheeger_bound": 2.0786, "bottleneck_index": 0.0741, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 6.6, "lambda_2_head_water": 4.356, "lambda_2_tail_tail": 3.6752, "F_spec": 1.1852, "kappa_spec": 0.6808, "cheeger_bound": 2.178, "bottleneck_index": 0.073, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.5, "lambda_2_head_water": 4.5815, "lambda_2_tail_tail": 3.6752, "F_spec": 1.2466, "kappa_spec": 0.9063, "cheeger_bound": 2.2908, "bottleneck_index": 0.0718, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.4, "lambda_2_head_water": 4.8331, "lambda_2_tail_tail": 3.6752, "F_spec": 1.3151, "kappa_spec": 1.1579, "cheeger_bound": 2.4166, "bottleneck_index": 0.0707, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.3, "lambda_2_head_water": 5.1078, "lambda_2_tail_tail": 3.6752, "F_spec": 1.3898, "kappa_spec": 1.4326, "cheeger_bound": 2.5539, "bottleneck_index": 0.0696, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.2, "lambda_2_head_water": 5.4005, "lambda_2_tail_tail": 3.6752, "F_spec": 1.4694, "kappa_spec": 1.7253, "cheeger_bound": 2.7002, "bottleneck_index": 0.0685, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.1, "lambda_2_head_water": 5.7038, "lambda_2_tail_tail": 3.6752, "F_spec": 1.552, "kappa_spec": 2.0286, "cheeger_bound": 2.8519, "bottleneck_index": 0.0675, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.0, "lambda_2_head_water": 6.0094, "lambda_2_tail_tail": 3.6752, "F_spec": 1.6351, "kappa_spec": 2.3342, "cheeger_bound": 3.0047, "bottleneck_index": 0.0666, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.9, "lambda_2_head_water": 6.3085, "lambda_2_tail_tail": 3.6752, "F_spec": 1.7165, "kappa_spec": 2.6333, "cheeger_bound": 3.1542, "bottleneck_index": 0.0659, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.8, "lambda_2_head_water": 6.5931, "lambda_2_tail_tail": 3.6752, "F_spec": 1.7939, "kappa_spec": 2.9178, "cheeger_bound": 3.2965, "bottleneck_index": 0.0652, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.7, "lambda_2_head_water": 6.8567, "lambda_2_tail_tail": 3.6752, "F_spec": 1.8657, "kappa_spec": 3.1815, "cheeger_bound": 3.4284, "bottleneck_index": 0.0646, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.6, "lambda_2_head_water": 7.095, "lambda_2_tail_tail": 3.6752, "F_spec": 1.9305, "kappa_spec": 3.4198, "cheeger_bound": 3.5475, "bottleneck_index": 0.0641, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.5, "lambda_2_head_water": 7.3057, "lambda_2_tail_tail": 3.6752, "F_spec": 1.9878, "kappa_spec": 3.6305, "cheeger_bound": 3.6529, "bottleneck_index": 0.0637, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.4, "lambda_2_head_water": 7.4885, "lambda_2_tail_tail": 3.6752, "F_spec": 2.0376, "kappa_spec": 3.8133, "cheeger_bound": 3.7442, "bottleneck_index": 0.0634, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.3, "lambda_2_head_water": 7.6444, "lambda_2_tail_tail": 3.6752, "F_spec": 2.08, "kappa_spec": 3.9692, "cheeger_bound": 3.8222, "bottleneck_index": 0.0631, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.2, "lambda_2_head_water": 7.7757, "lambda_2_tail_tail": 3.6752, "F_spec": 2.1157, "kappa_spec": 4.1005, "cheeger_bound": 3.8879, "bottleneck_index": 0.0629, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.1, "lambda_2_head_water": 7.885, "lambda_2_tail_tail": 3.6752, "F_spec": 2.1455, "kappa_spec": 4.2098, "cheeger_bound": 3.9425, "bottleneck_index": 0.0627, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.0, "lambda_2_head_water": 7.9752, "lambda_2_tail_tail": 3.6752, "F_spec": 2.17, "kappa_spec": 4.3, "cheeger_bound": 3.9876, "bottleneck_index": 0.0625, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.9, "lambda_2_head_water": 8.0491, "lambda_2_tail_tail": 3.6752, "F_spec": 2.1901, "kappa_spec": 4.3739, "cheeger_bound": 4.0246, "bottleneck_index": 0.0624, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.8, "lambda_2_head_water": 8.1093, "lambda_2_tail_tail": 3.6752, "F_spec": 2.2065, "kappa_spec": 4.4341, "cheeger_bound": 4.0546, "bottleneck_index": 0.0623, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.7, "lambda_2_head_water": 8.158, "lambda_2_tail_tail": 3.6752, "F_spec": 2.2197, "kappa_spec": 4.4828, "cheeger_bound": 4.079, "bottleneck_index": 0.0623, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.6, "lambda_2_head_water": 8.1974, "lambda_2_tail_tail": 3.6752, "F_spec": 2.2305, "kappa_spec": 4.5222, "cheeger_bound": 4.0987, "bottleneck_index": 0.0622, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.5, "lambda_2_head_water": 8.229, "lambda_2_tail_tail": 3.6752, "F_spec": 2.2391, "kappa_spec": 4.5538, "cheeger_bound": 4.1145, "bottleneck_index": 0.0622, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}], "DLinDMA": [{"pH": 7.4, "lambda_2_head_water": 4.1535, "lambda_2_tail_tail": 4.3551, "F_spec": 0.9537, "kappa_spec": -0.2016, "cheeger_bound": 2.0767, "bottleneck_index": 0.1778, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.3, "lambda_2_head_water": 4.3149, "lambda_2_tail_tail": 4.3551, "F_spec": 0.9908, "kappa_spec": -0.0402, "cheeger_bound": 2.1575, "bottleneck_index": 0.1756, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.2, "lambda_2_head_water": 4.4988, "lambda_2_tail_tail": 4.3551, "F_spec": 1.033, "kappa_spec": 0.1437, "cheeger_bound": 2.2494, "bottleneck_index": 0.1733, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.1, "lambda_2_head_water": 4.7072, "lambda_2_tail_tail": 4.3551, "F_spec": 1.0808, "kappa_spec": 0.3521, "cheeger_bound": 2.3536, "bottleneck_index": 0.171, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.0, "lambda_2_head_water": 4.9408, "lambda_2_tail_tail": 4.3551, "F_spec": 1.1345, "kappa_spec": 0.5856, "cheeger_bound": 2.4704, "bottleneck_index": 0.1686, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 6.9, "lambda_2_head_water": 5.1982, "lambda_2_tail_tail": 4.3551, "F_spec": 1.1936, "kappa_spec": 0.8431, "cheeger_bound": 2.5991, "bottleneck_index": 0.1662, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.8, "lambda_2_head_water": 5.4758, "lambda_2_tail_tail": 4.3551, "F_spec": 1.2573, "kappa_spec": 1.1207, "cheeger_bound": 2.7379, "bottleneck_index": 0.1638, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.7, "lambda_2_head_water": 5.7673, "lambda_2_tail_tail": 4.3551, "F_spec": 1.3243, "kappa_spec": 1.4122, "cheeger_bound": 2.8837, "bottleneck_index": 0.1616, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.6, "lambda_2_head_water": 6.0649, "lambda_2_tail_tail": 4.3551, "F_spec": 1.3926, "kappa_spec": 1.7098, "cheeger_bound": 3.0325, "bottleneck_index": 0.1596, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.5, "lambda_2_head_water": 6.3601, "lambda_2_tail_tail": 4.3551, "F_spec": 1.4604, "kappa_spec": 2.005, "cheeger_bound": 3.18, "bottleneck_index": 0.1577, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.4, "lambda_2_head_water": 6.6444, "lambda_2_tail_tail": 4.3551, "F_spec": 1.5257, "kappa_spec": 2.2893, "cheeger_bound": 3.3222, "bottleneck_index": 0.1561, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.3, "lambda_2_head_water": 6.9108, "lambda_2_tail_tail": 4.3551, "F_spec": 1.5868, "kappa_spec": 2.5557, "cheeger_bound": 3.4554, "bottleneck_index": 0.1547, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.2, "lambda_2_head_water": 7.1543, "lambda_2_tail_tail": 4.3551, "F_spec": 1.6427, "kappa_spec": 2.7992, "cheeger_bound": 3.5772, "bottleneck_index": 0.1535, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.1, "lambda_2_head_water": 7.3718, "lambda_2_tail_tail": 4.3551, "F_spec": 1.6927, "kappa_spec": 3.0167, "cheeger_bound": 3.6859, "bottleneck_index": 0.1526, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.0, "lambda_2_head_water": 7.5622, "lambda_2_tail_tail": 4.3551, "F_spec": 1.7364, "kappa_spec": 3.2071, "cheeger_bound": 3.7811, "bottleneck_index": 0.1517, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.9, "lambda_2_head_water": 7.726, "lambda_2_tail_tail": 4.3551, "F_spec": 1.774, "kappa_spec": 3.3709, "cheeger_bound": 3.863, "bottleneck_index": 0.1511, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.8, "lambda_2_head_water": 7.8649, "lambda_2_tail_tail": 4.3551, "F_spec": 1.8059, "kappa_spec": 3.5098, "cheeger_bound": 3.9325, "bottleneck_index": 0.1505, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.7, "lambda_2_head_water": 7.9811, "lambda_2_tail_tail": 4.3551, "F_spec": 1.8326, "kappa_spec": 3.626, "cheeger_bound": 3.9906, "bottleneck_index": 0.1501, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.6, "lambda_2_head_water": 8.0774, "lambda_2_tail_tail": 4.3551, "F_spec": 1.8547, "kappa_spec": 3.7223, "cheeger_bound": 4.0387, "bottleneck_index": 0.1497, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.5, "lambda_2_head_water": 8.1565, "lambda_2_tail_tail": 4.3551, "F_spec": 1.8729, "kappa_spec": 3.8014, "cheeger_bound": 4.0782, "bottleneck_index": 0.1494, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.4, "lambda_2_head_water": 8.221, "lambda_2_tail_tail": 4.3551, "F_spec": 1.8877, "kappa_spec": 3.8659, "cheeger_bound": 4.1105, "bottleneck_index": 0.1492, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.3, "lambda_2_head_water": 8.2733, "lambda_2_tail_tail": 4.3551, "F_spec": 1.8997, "kappa_spec": 3.9182, "cheeger_bound": 4.1366, "bottleneck_index": 0.149, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.2, "lambda_2_head_water": 8.3155, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9094, "kappa_spec": 3.9604, "cheeger_bound": 4.1577, "bottleneck_index": 0.1489, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.1, "lambda_2_head_water": 8.3495, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9172, "kappa_spec": 3.9944, "cheeger_bound": 4.1747, "bottleneck_index": 0.1487, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.0, "lambda_2_head_water": 8.3768, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9234, "kappa_spec": 4.0216, "cheeger_bound": 4.1884, "bottleneck_index": 0.1487, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.9, "lambda_2_head_water": 8.3986, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9284, "kappa_spec": 4.0435, "cheeger_bound": 4.1993, "bottleneck_index": 0.1486, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.8, "lambda_2_head_water": 8.4161, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9325, "kappa_spec": 4.0609, "cheeger_bound": 4.208, "bottleneck_index": 0.1485, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.7, "lambda_2_head_water": 8.43, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9357, "kappa_spec": 4.0749, "cheeger_bound": 4.215, "bottleneck_index": 0.1485, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.6, "lambda_2_head_water": 8.4411, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9382, "kappa_spec": 4.086, "cheeger_bound": 4.2206, "bottleneck_index": 0.1484, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.5, "lambda_2_head_water": 8.45, "lambda_2_tail_tail": 4.3551, "F_spec": 1.9402, "kappa_spec": 4.0949, "cheeger_bound": 4.225, "bottleneck_index": 0.1484, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}], "ALC-0315 (S,S)": [{"pH": 7.4, "lambda_2_head_water": 3.4416, "lambda_2_tail_tail": 3.3378, "F_spec": 1.0311, "kappa_spec": 0.1037, "cheeger_bound": 1.7208, "bottleneck_index": 0.0316, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.3, "lambda_2_head_water": 3.5239, "lambda_2_tail_tail": 3.3378, "F_spec": 1.0558, "kappa_spec": 0.1861, "cheeger_bound": 1.762, "bottleneck_index": 0.0314, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.2, "lambda_2_head_water": 3.6219, "lambda_2_tail_tail": 3.3378, "F_spec": 1.0851, "kappa_spec": 0.2841, "cheeger_bound": 1.811, "bottleneck_index": 0.031, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.1, "lambda_2_head_water": 3.7381, "lambda_2_tail_tail": 3.3378, "F_spec": 1.1199, "kappa_spec": 0.4002, "cheeger_bound": 1.869, "bottleneck_index": 0.0307, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.0, "lambda_2_head_water": 3.8752, "lambda_2_tail_tail": 3.3378, "F_spec": 1.161, "kappa_spec": 0.5374, "cheeger_bound": 1.9376, "bottleneck_index": 0.0303, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.9, "lambda_2_head_water": 4.036, "lambda_2_tail_tail": 3.3378, "F_spec": 1.2092, "kappa_spec": 0.6982, "cheeger_bound": 2.018, "bottleneck_index": 0.0299, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.8, "lambda_2_head_water": 4.2228, "lambda_2_tail_tail": 3.3378, "F_spec": 1.2651, "kappa_spec": 0.885, "cheeger_bound": 2.1114, "bottleneck_index": 0.0295, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.7, "lambda_2_head_water": 4.437, "lambda_2_tail_tail": 3.3378, "F_spec": 1.3293, "kappa_spec": 1.0992, "cheeger_bound": 2.2185, "bottleneck_index": 0.029, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.6, "lambda_2_head_water": 4.6784, "lambda_2_tail_tail": 3.3378, "F_spec": 1.4016, "kappa_spec": 1.3406, "cheeger_bound": 2.3392, "bottleneck_index": 0.0285, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.5, "lambda_2_head_water": 4.9449, "lambda_2_tail_tail": 3.3378, "F_spec": 1.4815, "kappa_spec": 1.6071, "cheeger_bound": 2.4725, "bottleneck_index": 0.0281, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.4, "lambda_2_head_water": 5.2321, "lambda_2_tail_tail": 3.3378, "F_spec": 1.5675, "kappa_spec": 1.8942, "cheeger_bound": 2.616, "bottleneck_index": 0.0276, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.3, "lambda_2_head_water": 5.5333, "lambda_2_tail_tail": 3.3378, "F_spec": 1.6578, "kappa_spec": 2.1955, "cheeger_bound": 2.7666, "bottleneck_index": 0.0272, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.2, "lambda_2_head_water": 5.8404, "lambda_2_tail_tail": 3.3378, "F_spec": 1.7498, "kappa_spec": 2.5026, "cheeger_bound": 2.9202, "bottleneck_index": 0.0268, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.1, "lambda_2_head_water": 6.1445, "lambda_2_tail_tail": 3.3378, "F_spec": 1.8409, "kappa_spec": 2.8067, "cheeger_bound": 3.0723, "bottleneck_index": 0.0265, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.0, "lambda_2_head_water": 6.4371, "lambda_2_tail_tail": 3.3378, "F_spec": 1.9285, "kappa_spec": 3.0993, "cheeger_bound": 3.2186, "bottleneck_index": 0.0262, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.9, "lambda_2_head_water": 6.711, "lambda_2_tail_tail": 3.3378, "F_spec": 2.0106, "kappa_spec": 3.3732, "cheeger_bound": 3.3555, "bottleneck_index": 0.026, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.8, "lambda_2_head_water": 6.9609, "lambda_2_tail_tail": 3.3378, "F_spec": 2.0855, "kappa_spec": 3.6231, "cheeger_bound": 3.4805, "bottleneck_index": 0.0257, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.7, "lambda_2_head_water": 7.1838, "lambda_2_tail_tail": 3.3378, "F_spec": 2.1522, "kappa_spec": 3.8459, "cheeger_bound": 3.5919, "bottleneck_index": 0.0256, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.6, "lambda_2_head_water": 7.3785, "lambda_2_tail_tail": 3.3378, "F_spec": 2.2106, "kappa_spec": 4.0406, "cheeger_bound": 3.6892, "bottleneck_index": 0.0254, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.5, "lambda_2_head_water": 7.5457, "lambda_2_tail_tail": 3.3378, "F_spec": 2.2607, "kappa_spec": 4.2079, "cheeger_bound": 3.7728, "bottleneck_index": 0.0253, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.4, "lambda_2_head_water": 7.6873, "lambda_2_tail_tail": 3.3378, "F_spec": 2.3031, "kappa_spec": 4.3494, "cheeger_bound": 3.8436, "bottleneck_index": 0.0252, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.3, "lambda_2_head_water": 7.8057, "lambda_2_tail_tail": 3.3378, "F_spec": 2.3386, "kappa_spec": 4.4679, "cheeger_bound": 3.9028, "bottleneck_index": 0.0251, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.2, "lambda_2_head_water": 7.9038, "lambda_2_tail_tail": 3.3378, "F_spec": 2.3679, "kappa_spec": 4.566, "cheeger_bound": 3.9519, "bottleneck_index": 0.0251, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.1, "lambda_2_head_water": 7.9844, "lambda_2_tail_tail": 3.3378, "F_spec": 2.3921, "kappa_spec": 4.6466, "cheeger_bound": 3.9922, "bottleneck_index": 0.025, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.0, "lambda_2_head_water": 8.0502, "lambda_2_tail_tail": 3.3378, "F_spec": 2.4118, "kappa_spec": 4.7124, "cheeger_bound": 4.0251, "bottleneck_index": 0.025, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.9, "lambda_2_head_water": 8.1037, "lambda_2_tail_tail": 3.3378, "F_spec": 2.4278, "kappa_spec": 4.7659, "cheeger_bound": 4.0518, "bottleneck_index": 0.0249, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.8, "lambda_2_head_water": 8.1469, "lambda_2_tail_tail": 3.3378, "F_spec": 2.4408, "kappa_spec": 4.8091, "cheeger_bound": 4.0735, "bottleneck_index": 0.0249, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.7, "lambda_2_head_water": 8.1817, "lambda_2_tail_tail": 3.3378, "F_spec": 2.4512, "kappa_spec": 4.8439, "cheeger_bound": 4.0909, "bottleneck_index": 0.0249, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.6, "lambda_2_head_water": 8.2097, "lambda_2_tail_tail": 3.3378, "F_spec": 2.4596, "kappa_spec": 4.8718, "cheeger_bound": 4.1048, "bottleneck_index": 0.0249, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.5, "lambda_2_head_water": 8.2321, "lambda_2_tail_tail": 3.3378, "F_spec": 2.4663, "kappa_spec": 4.8943, "cheeger_bound": 4.116, "bottleneck_index": 0.0249, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}], "ALC-0315 (R,R)": [{"pH": 7.4, "lambda_2_head_water": 3.578, "lambda_2_tail_tail": 3.1721, "F_spec": 1.128, "kappa_spec": 0.4059, "cheeger_bound": 1.789, "bottleneck_index": 0.7015, "phase": "Inverse Micellar Cubic Fd3m", "fusogenic_score": 0.55}, {"pH": 7.3, "lambda_2_head_water": 3.6696, "lambda_2_tail_tail": 3.1721, "F_spec": 1.1569, "kappa_spec": 0.4975, "cheeger_bound": 1.8348, "bottleneck_index": 0.6953, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 7.2, "lambda_2_head_water": 3.7739, "lambda_2_tail_tail": 3.1721, "F_spec": 1.1897, "kappa_spec": 0.6018, "cheeger_bound": 1.8869, "bottleneck_index": 0.6885, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 7.1, "lambda_2_head_water": 3.8927, "lambda_2_tail_tail": 3.1721, "F_spec": 1.2272, "kappa_spec": 0.7207, "cheeger_bound": 1.9464, "bottleneck_index": 0.6812, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 7.0, "lambda_2_head_water": 4.0284, "lambda_2_tail_tail": 3.1721, "F_spec": 1.2699, "kappa_spec": 0.8563, "cheeger_bound": 2.0142, "bottleneck_index": 0.6734, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.9, "lambda_2_head_water": 4.1834, "lambda_2_tail_tail": 3.1721, "F_spec": 1.3188, "kappa_spec": 1.0114, "cheeger_bound": 2.0917, "bottleneck_index": 0.6651, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.8, "lambda_2_head_water": 4.3606, "lambda_2_tail_tail": 3.1721, "F_spec": 1.3747, "kappa_spec": 1.1885, "cheeger_bound": 2.1803, "bottleneck_index": 0.6564, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.7, "lambda_2_head_water": 4.562, "lambda_2_tail_tail": 3.1721, "F_spec": 1.4382, "kappa_spec": 1.39, "cheeger_bound": 2.281, "bottleneck_index": 0.6473, "phase": "Inverse Hexagonal H_II (Peak Fusogenic)", "fusogenic_score": 0.98}, {"pH": 6.6, "lambda_2_head_water": 4.7888, "lambda_2_tail_tail": 3.1721, "F_spec": 1.5097, "kappa_spec": 1.6167, "cheeger_bound": 2.3944, "bottleneck_index": 0.6379, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.5, "lambda_2_head_water": 5.0402, "lambda_2_tail_tail": 3.1721, "F_spec": 1.5889, "kappa_spec": 1.8682, "cheeger_bound": 2.5201, "bottleneck_index": 0.6286, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.4, "lambda_2_head_water": 5.3134, "lambda_2_tail_tail": 3.1721, "F_spec": 1.6751, "kappa_spec": 2.1413, "cheeger_bound": 2.6567, "bottleneck_index": 0.6194, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.3, "lambda_2_head_water": 5.603, "lambda_2_tail_tail": 3.1721, "F_spec": 1.7663, "kappa_spec": 2.4309, "cheeger_bound": 2.8015, "bottleneck_index": 0.6106, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.2, "lambda_2_head_water": 5.9017, "lambda_2_tail_tail": 3.1721, "F_spec": 1.8605, "kappa_spec": 2.7296, "cheeger_bound": 2.9508, "bottleneck_index": 0.6025, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.1, "lambda_2_head_water": 6.201, "lambda_2_tail_tail": 3.1721, "F_spec": 1.9549, "kappa_spec": 3.029, "cheeger_bound": 3.1005, "bottleneck_index": 0.5951, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 6.0, "lambda_2_head_water": 6.4926, "lambda_2_tail_tail": 3.1721, "F_spec": 2.0468, "kappa_spec": 3.3205, "cheeger_bound": 3.2463, "bottleneck_index": 0.5886, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.9, "lambda_2_head_water": 6.7687, "lambda_2_tail_tail": 3.1721, "F_spec": 2.1338, "kappa_spec": 3.5966, "cheeger_bound": 3.3843, "bottleneck_index": 0.583, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.8, "lambda_2_head_water": 7.0234, "lambda_2_tail_tail": 3.1721, "F_spec": 2.2141, "kappa_spec": 3.8513, "cheeger_bound": 3.5117, "bottleneck_index": 0.5781, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.7, "lambda_2_head_water": 7.2528, "lambda_2_tail_tail": 3.1721, "F_spec": 2.2865, "kappa_spec": 4.0808, "cheeger_bound": 3.6264, "bottleneck_index": 0.5741, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.6, "lambda_2_head_water": 7.4552, "lambda_2_tail_tail": 3.1721, "F_spec": 2.3503, "kappa_spec": 4.2831, "cheeger_bound": 3.7276, "bottleneck_index": 0.5707, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.5, "lambda_2_head_water": 7.6304, "lambda_2_tail_tail": 3.1721, "F_spec": 2.4055, "kappa_spec": 4.4583, "cheeger_bound": 3.8152, "bottleneck_index": 0.5679, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.4, "lambda_2_head_water": 7.7796, "lambda_2_tail_tail": 3.1721, "F_spec": 2.4525, "kappa_spec": 4.6076, "cheeger_bound": 3.8898, "bottleneck_index": 0.5657, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.3, "lambda_2_head_water": 7.905, "lambda_2_tail_tail": 3.1721, "F_spec": 2.4921, "kappa_spec": 4.733, "cheeger_bound": 3.9525, "bottleneck_index": 0.5639, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.2, "lambda_2_head_water": 8.0092, "lambda_2_tail_tail": 3.1721, "F_spec": 2.5249, "kappa_spec": 4.8371, "cheeger_bound": 4.0046, "bottleneck_index": 0.5624, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.1, "lambda_2_head_water": 8.095, "lambda_2_tail_tail": 3.1721, "F_spec": 2.552, "kappa_spec": 4.9229, "cheeger_bound": 4.0475, "bottleneck_index": 0.5612, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 5.0, "lambda_2_head_water": 8.165, "lambda_2_tail_tail": 3.1721, "F_spec": 2.574, "kappa_spec": 4.993, "cheeger_bound": 4.0825, "bottleneck_index": 0.5602, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.9, "lambda_2_head_water": 8.222, "lambda_2_tail_tail": 3.1721, "F_spec": 2.592, "kappa_spec": 5.0499, "cheeger_bound": 4.111, "bottleneck_index": 0.5595, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.8, "lambda_2_head_water": 8.268, "lambda_2_tail_tail": 3.1721, "F_spec": 2.6065, "kappa_spec": 5.096, "cheeger_bound": 4.134, "bottleneck_index": 0.5589, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.7, "lambda_2_head_water": 8.3051, "lambda_2_tail_tail": 3.1721, "F_spec": 2.6182, "kappa_spec": 5.1331, "cheeger_bound": 4.1526, "bottleneck_index": 0.5584, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.6, "lambda_2_head_water": 8.3349, "lambda_2_tail_tail": 3.1721, "F_spec": 2.6276, "kappa_spec": 5.1629, "cheeger_bound": 4.1675, "bottleneck_index": 0.558, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}, {"pH": 4.5, "lambda_2_head_water": 8.3588, "lambda_2_tail_tail": 3.1721, "F_spec": 2.6351, "kappa_spec": 5.1868, "cheeger_bound": 4.1794, "bottleneck_index": 0.5577, "phase": "Bicontinuous Cubic Q_2 (Pn3m/Ia3d)", "fusogenic_score": 0.82}]};
 
         let scene, camera, renderer, particleGroup;
@@ -250,28 +297,33 @@
         function initThreeJS() {
             const container = document.getElementById('viewport-container');
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x0d1322, 0.012);
+            scene.fog = new THREE.FogExp2(0x0c1220, 0.010);
 
             camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(0, 15, 38);
+            
+            // Shifted Camera Target UPWARD so rendering is elevated in viewport!
+            camera.position.set(0, 16, 42);
+            camera.lookAt(0, 5, 0);
 
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas-3d'), antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
 
-            // Bright Multi-Directional Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            // Multi-Directional Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
             scene.add(ambientLight);
 
-            const mainLight = new THREE.DirectionalLight(0x00e5ff, 1.5);
-            mainLight.position.set(30, 40, 30);
+            const mainLight = new THREE.DirectionalLight(0x00e5ff, 1.6);
+            mainLight.position.set(30, 50, 30);
             scene.add(mainLight);
 
-            const fillLight = new THREE.DirectionalLight(0xff4081, 1.0);
-            fillLight.position.set(-30, -20, -20);
+            const fillLight = new THREE.DirectionalLight(0xff4081, 1.1);
+            fillLight.position.set(-30, -10, -20);
             scene.add(fillLight);
 
             particleGroup = new THREE.Group();
+            // Elevate particle group vertically UPWARD (y = +4.5)
+            particleGroup.position.set(0, 4.5, 0);
             scene.add(particleGroup);
 
             window.addEventListener('resize', () => {
@@ -283,113 +335,222 @@
             animate();
         }
 
-        function buildMesophase3D(F_spec) {
+        function buildMesophase3D(F_spec, layerMode) {
             if (!particleGroup) return;
 
-            // Clear existing particles
+            // Clear existing elements
             while(particleGroup.children.length > 0){ 
                 particleGroup.remove(particleGroup.children[0]); 
             }
 
-            const numLipids = 300;
-            const headGeo = new THREE.SphereGeometry(0.6, 16, 16);
-            const tailGeo = new THREE.CylinderGeometry(0.18, 0.18, 2.2, 10);
-            
-            const headMat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, shininess: 100, emissive: 0x003344 });
-            const tailMat = new THREE.MeshPhongMaterial({ color: 0xff4081, shininess: 60, emissive: 0x440022 });
+            const numLipids = 260;
+            const headGeo = new THREE.SphereGeometry(0.55, 14, 14);
+            const tailGeo = new THREE.CylinderGeometry(0.16, 0.16, 2.2, 8);
+            const waterGeo = new THREE.SphereGeometry(0.32, 10, 10);
+            const mrnaGeo = new THREE.SphereGeometry(0.45, 12, 12);
+
+            const headMat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, shininess: 90, emissive: 0x003344 });
+            const tailMat = new THREE.MeshPhongMaterial({ color: 0xff4081, shininess: 50, emissive: 0x330015 });
+            const waterMat = new THREE.MeshPhongMaterial({ color: 0x80deea, transparent: true, opacity: 0.85, shininess: 100 });
+            const mrnaMat = new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 100, emissive: 0x443300 });
+            const edgeMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.4 });
+
+            const showLipids = (layerMode === 'ALL' || layerMode === 'LIPID');
+            const showWater = (layerMode === 'ALL' || layerMode === 'WATER');
+            const showGraph = (layerMode === 'ALL' || layerMode === 'WATER' || layerMode === 'GRAPH');
+
+            let headPositions = [];
+            let waterPositions = [];
 
             if (F_spec < 0.85) {
                 // Lamellar / Spherical Vesicle (F_spec < 0.85)
-                const radius = 13;
+                const radius = 12.5;
                 for(let i=0; i<numLipids; i++) {
                     const phi = Math.acos(-1 + (2 * i) / numLipids);
                     const theta = Math.sqrt(numLipids * Math.PI) * phi;
                     
-                    const headMesh = new THREE.Mesh(headGeo, headMat);
-                    const x = radius * Math.sin(phi) * Math.cos(theta);
-                    const y = radius * Math.sin(phi) * Math.sin(theta);
-                    const z = radius * Math.cos(phi);
-                    headMesh.position.set(x, y, z);
+                    const hx = radius * Math.sin(phi) * Math.cos(theta);
+                    const hy = radius * Math.sin(phi) * Math.sin(theta);
+                    const hz = radius * Math.cos(phi);
+                    headPositions.push(new THREE.Vector3(hx, hy, hz));
 
-                    const normal = new THREE.Vector3(x, y, z).normalize();
-                    const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                    tailMesh.position.set(x - normal.x * 1.2, y - normal.y * 1.2, z - normal.z * 1.2);
-                    tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+                    if (showLipids) {
+                        const headMesh = new THREE.Mesh(headGeo, headMat);
+                        headMesh.position.set(hx, hy, hz);
 
-                    particleGroup.add(headMesh);
-                    particleGroup.add(tailMesh);
+                        const normal = new THREE.Vector3(hx, hy, hz).normalize();
+                        const tailMesh = new THREE.Mesh(tailGeo, tailMat);
+                        tailMesh.position.set(hx - normal.x * 1.2, hy - normal.y * 1.2, hz - normal.z * 1.2);
+                        tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+
+                        particleGroup.add(headMesh);
+                        particleGroup.add(tailMesh);
+                    }
+
+                    // Water molecules around outer hydration shell
+                    if (showWater) {
+                        const wr = radius + 1.8 + Math.sin(i * 3) * 0.8;
+                        const wx = wr * Math.sin(phi) * Math.cos(theta + 0.1);
+                        const wy = wr * Math.sin(phi) * Math.sin(theta + 0.1);
+                        const wz = wr * Math.cos(phi);
+                        const wpos = new THREE.Vector3(wx, wy, wz);
+                        waterPositions.push(wpos);
+
+                        const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                        waterMesh.position.copy(wpos);
+                        particleGroup.add(waterMesh);
+                    }
                 }
+
+                // Internal mRNA in polar cavity center
+                if (showLipids || layerMode === 'ALL') {
+                    for(let m=0; m<25; m++) {
+                        const mr = Math.random() * 4.0;
+                        const mtheta = Math.random() * Math.PI * 2;
+                        const mphi = Math.random() * Math.PI;
+                        const mrnaMesh = new THREE.Mesh(mrnaGeo, mrnaMat);
+                        mrnaMesh.position.set(mr*Math.sin(mphi)*Math.cos(mtheta), mr*Math.sin(mphi)*Math.sin(mtheta), mr*Math.cos(mphi));
+                        particleGroup.add(mrnaMesh);
+                    }
+                }
+
             } else if (F_spec < 1.15) {
                 // Inverse Micellar Cubic Fd3m (0.85 <= F_spec < 1.15)
                 const micelleCount = 8;
                 for(let m=0; m<micelleCount; m++) {
-                    const cx = (m % 2 === 0 ? 1 : -1) * 9;
-                    const cy = (Math.floor(m / 2) % 2 === 0 ? 1 : -1) * 9;
-                    const cz = (m >= 4 ? 1 : -1) * 9;
+                    const cx = (m % 2 === 0 ? 1 : -1) * 8.5;
+                    const cy = (Math.floor(m / 2) % 2 === 0 ? 1 : -1) * 8.5;
+                    const cz = (m >= 4 ? 1 : -1) * 8.5;
 
-                    for(let i=0; i<25; i++) {
+                    for(let i=0; i<20; i++) {
                         const theta = Math.random() * Math.PI * 2;
                         const phi = Math.random() * Math.PI;
-                        const r = 3.8;
+                        const r = 3.6;
 
-                        const headMesh = new THREE.Mesh(headGeo, headMat);
-                        const x = cx + r * Math.sin(phi) * Math.cos(theta);
-                        const y = cy + r * Math.sin(phi) * Math.sin(theta);
-                        const z = cz + r * Math.cos(phi);
-                        headMesh.position.set(x, y, z);
+                        const hx = cx + r * Math.sin(phi) * Math.cos(theta);
+                        const hy = cy + r * Math.sin(phi) * Math.sin(theta);
+                        const hz = cz + r * Math.cos(phi);
+                        const hpos = new THREE.Vector3(hx, hy, hz);
+                        headPositions.push(hpos);
 
-                        const dir = new THREE.Vector3(x - cx, y - cy, z - cz).normalize();
-                        const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                        tailMesh.position.set(x + dir.x * 1.1, y + dir.y * 1.1, z + dir.z * 1.1);
-                        tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+                        if (showLipids) {
+                            const headMesh = new THREE.Mesh(headGeo, headMat);
+                            headMesh.position.copy(hpos);
 
-                        particleGroup.add(headMesh);
-                        particleGroup.add(tailMesh);
+                            const dir = new THREE.Vector3(hx - cx, hy - cy, hz - cz).normalize();
+                            const tailMesh = new THREE.Mesh(tailGeo, tailMat);
+                            tailMesh.position.set(hx + dir.x * 1.1, hy + dir.y * 1.1, hz + dir.z * 1.1);
+                            tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+
+                            particleGroup.add(headMesh);
+                            particleGroup.add(tailMesh);
+                        }
+
+                        if (showWater) {
+                            const wr = 1.6;
+                            const wx = cx + wr * Math.sin(phi) * Math.cos(theta);
+                            const wy = cy + wr * Math.sin(phi) * Math.sin(theta);
+                            const wz = cz + wr * Math.cos(phi);
+                            const wpos = new THREE.Vector3(wx, wy, wz);
+                            waterPositions.push(wpos);
+
+                            const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                            waterMesh.position.copy(wpos);
+                            particleGroup.add(waterMesh);
+                        }
                     }
                 }
             } else if (F_spec < 1.45) {
                 // Inverse Hexagonal H_II (1.15 <= F_spec < 1.45)
                 const tubeCount = 5;
                 for(let t=0; t<tubeCount; t++) {
-                    const tx = (t - 2) * 8;
-                    for(let i=0; i<50; i++) {
-                        const angle = (i / 50) * Math.PI * 2;
-                        const z = ((i % 10) - 5) * 3.5;
+                    const tx = (t - 2) * 7.5;
+                    for(let i=0; i<45; i++) {
+                        const angle = (i / 45) * Math.PI * 2;
+                        const z = ((i % 9) - 4.5) * 3.2;
                         const r = 3.2;
 
-                        const headMesh = new THREE.Mesh(headGeo, headMat);
-                        const x = tx + r * Math.cos(angle);
-                        const y = r * Math.sin(angle);
-                        headMesh.position.set(x, y, z);
+                        const hx = tx + r * Math.cos(angle);
+                        const hy = r * Math.sin(angle);
+                        const hz = z;
+                        const hpos = new THREE.Vector3(hx, hy, hz);
+                        headPositions.push(hpos);
 
-                        const dir = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
-                        const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                        tailMesh.position.set(x + dir.x * 1.1, y + dir.y * 1.1, z);
-                        tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+                        if (showLipids) {
+                            const headMesh = new THREE.Mesh(headGeo, headMat);
+                            headMesh.position.copy(hpos);
 
-                        particleGroup.add(headMesh);
-                        particleGroup.add(tailMesh);
+                            const dir = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
+                            const tailMesh = new THREE.Mesh(tailGeo, tailMat);
+                            tailMesh.position.set(hx + dir.x * 1.1, hy + dir.y * 1.1, hz);
+                            tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+
+                            particleGroup.add(headMesh);
+                            particleGroup.add(tailMesh);
+                        }
+
+                        if (showWater) {
+                            const wr = 1.4;
+                            const wx = tx + wr * Math.cos(angle);
+                            const wy = wr * Math.sin(angle);
+                            const wpos = new THREE.Vector3(wx, wy, hz);
+                            waterPositions.push(wpos);
+
+                            const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                            waterMesh.position.copy(wpos);
+                            particleGroup.add(waterMesh);
+                        }
                     }
                 }
             } else {
                 // Bicontinuous Cubic Q_2 (F_spec >= 1.45)
-                for(let i=0; i<240; i++) {
-                    const u = (i / 240) * Math.PI * 4;
+                for(let i=0; i<200; i++) {
+                    const u = (i / 200) * Math.PI * 4;
                     const v = (i % 20) / 20 * Math.PI * 2;
-                    const x = 12 * Math.sin(u) * Math.cos(v);
-                    const y = 12 * Math.sin(u) * Math.sin(v);
-                    const z = 12 * Math.cos(u);
+                    const hx = 11 * Math.sin(u) * Math.cos(v);
+                    const hy = 11 * Math.sin(u) * Math.sin(v);
+                    const hz = 11 * Math.cos(u);
+                    const hpos = new THREE.Vector3(hx, hy, hz);
+                    headPositions.push(hpos);
 
-                    const headMesh = new THREE.Mesh(headGeo, headMat);
-                    headMesh.position.set(x, y, z);
-                    particleGroup.add(headMesh);
+                    if (showLipids) {
+                        const headMesh = new THREE.Mesh(headGeo, headMat);
+                        headMesh.position.copy(hpos);
+                        particleGroup.add(headMesh);
+                    }
+
+                    if (showWater) {
+                        const wpos = new THREE.Vector3(hx * 0.85, hy * 0.85, hz * 0.85);
+                        waterPositions.push(wpos);
+                        const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                        waterMesh.position.copy(wpos);
+                        particleGroup.add(waterMesh);
+                    }
+                }
+            }
+
+            // Draw Fiedler Graph Edges (Hydrogen Bonding / Network Laplacian Connectivity)
+            if (showGraph && headPositions.length > 0 && waterPositions.length > 0) {
+                const maxEdges = 140;
+                let edgeCount = 0;
+                for(let i=0; i<headPositions.length; i++) {
+                    for(let j=0; j<waterPositions.length; j++) {
+                        const dist = headPositions[i].distanceTo(waterPositions[j]);
+                        if (dist < 4.5 && edgeCount < maxEdges) {
+                            const points = [headPositions[i], waterPositions[j]];
+                            const edgeGeo = new THREE.BufferGeometry().setFromPoints(points);
+                            const line = new THREE.Line(edgeGeo, edgeMat);
+                            particleGroup.add(line);
+                            edgeCount++;
+                        }
+                    }
                 }
             }
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            if(particleGroup) particleGroup.rotation.y += 0.004;
+            if(particleGroup) particleGroup.rotation.y += 0.0035;
             renderer.render(scene, camera);
         }
 
@@ -426,6 +587,7 @@
         function updateSimulation() {
             if(!spectralData) return;
             const selectedSystem = document.getElementById('lipid-select').value;
+            const selectedLayer = document.getElementById('layer-select').value;
             const currentpH = parseFloat(document.getElementById('ph-slider').value);
             document.getElementById('ph-val').innerText = currentpH.toFixed(1);
 
@@ -451,7 +613,7 @@
             }
 
             // 3D Scene update
-            buildMesophase3D(dataPoint.F_spec);
+            buildMesophase3D(dataPoint.F_spec, selectedLayer);
         }
 
         // Synchronous initial loading on DOM load
@@ -463,6 +625,7 @@
 
         document.getElementById('ph-slider').addEventListener('input', updateSimulation);
         document.getElementById('lipid-select').addEventListener('change', updateSimulation);
+        document.getElementById('layer-select').addEventListener('change', updateSimulation);
     </script>
 </body>
 </html>
