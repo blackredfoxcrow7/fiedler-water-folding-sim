@@ -159,7 +159,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 14px 18px;
-            width: 320px;
+            width: 330px;
             pointer-events: none;
             backdrop-filter: blur(12px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
@@ -224,7 +224,7 @@
     <div id="sidebar">
         <div>
             <h1>Pure Fiedler Spectral Dynamics</h1>
-            <div class="subtitle">LNP2 Mesophase & Water Network Simulator</div>
+            <div class="subtitle">LNP2 Inverted Mesophases & Water Network Simulator</div>
         </div>
 
         <div class="control-group">
@@ -358,16 +358,15 @@
                 particleGroup.remove(particleGroup.children[0]); 
             }
 
-            const numLipids = 280;
-            const headGeo = new THREE.SphereGeometry(0.60, 16, 16);
-            const tailGeo = new THREE.CylinderGeometry(0.24, 0.24, 2.6, 10);
-            const waterGeo = new THREE.SphereGeometry(0.38, 12, 12);
+            const headGeo = new THREE.SphereGeometry(0.55, 14, 14);
+            const tailGeo = new THREE.CylinderGeometry(0.22, 0.22, 2.5, 10);
+            const waterGeo = new THREE.SphereGeometry(0.36, 12, 12);
             const mrnaGeo = new THREE.SphereGeometry(0.50, 14, 14);
 
             // High-Contrast Materials
             const headMat = new THREE.MeshPhongMaterial({ color: 0x00e5ff, shininess: 120, emissive: 0x004466 });
             const tailMat = new THREE.MeshPhongMaterial({ color: 0xff1744, shininess: 80, emissive: 0x660011 });
-            const waterMat = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.92, shininess: 120, emissive: 0x222222 });
+            const waterMat = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, shininess: 120, emissive: 0x222222 });
             const mrnaMat = new THREE.MeshPhongMaterial({ color: 0xffd700, shininess: 120, emissive: 0x554400 });
             const edgeMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.35 });
 
@@ -379,7 +378,9 @@
             let waterPositions = [];
 
             if (F_spec < 0.85) {
-                // Lamellar / Spherical Vesicle (F_spec < 0.85)
+                // Stage 1: Neutral pH 7.4 Core-Shell Vesicle / Amorphous Oil Core (F_spec < 0.85)
+                // Outer Monolayer Shell: Cyan heads on outer boundary (R=13), Pink tails pointing INWARD towards oil core
+                const numLipids = 240;
                 const radius = 13.0;
                 for(let i=0; i<numLipids; i++) {
                     const phi = Math.acos(-1 + (2 * i) / numLipids);
@@ -396,14 +397,15 @@
 
                         const normal = new THREE.Vector3(hx, hy, hz).normalize();
                         const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                        tailMesh.position.set(hx - normal.x * 1.4, hy - normal.y * 1.4, hz - normal.z * 1.4);
+                        // TAILS POINT INWARD TOWARDS OIL CORE!
+                        tailMesh.position.set(hx - normal.x * 1.3, hy - normal.y * 1.3, hz - normal.z * 1.3);
                         tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
                         particleGroup.add(headMesh);
                         particleGroup.add(tailMesh);
                     }
 
-                    // Water molecules around outer hydration shell
+                    // Water molecules in outer hydration shell
                     if (showWater) {
                         const wr = radius + 2.0 + Math.sin(i * 3) * 0.8;
                         const wx = wr * Math.sin(phi) * Math.cos(theta + 0.1);
@@ -420,8 +422,8 @@
 
                 // Internal mRNA in polar cavity center
                 if (showLipids || layerMode === 'ALL') {
-                    for(let m=0; m<28; m++) {
-                        const mr = Math.random() * 4.2;
+                    for(let m=0; m<25; m++) {
+                        const mr = Math.random() * 4.0;
                         const mtheta = Math.random() * Math.PI * 2;
                         const mphi = Math.random() * Math.PI;
                         const mrnaMesh = new THREE.Mesh(mrnaGeo, mrnaMat);
@@ -431,21 +433,40 @@
                 }
 
             } else if (F_spec < 1.15) {
-                // Inverse Micellar Cubic Fd3m (0.85 <= F_spec < 1.15)
-                const micelleCount = 8;
-                for(let m=0; m<micelleCount; m++) {
-                    const cx = (m % 2 === 0 ? 1 : -1) * 9.0;
-                    const cy = (Math.floor(m / 2) % 2 === 0 ? 1 : -1) * 9.0;
-                    const cz = (m >= 4 ? 1 : -1) * 9.0;
+                // Stage 2: Inverse Micellar Cubic Fd3m (0.85 <= F_spec < 1.15)
+                // 8 Spherical INVERTED MICELLES: Cyan heads face INWARD, Pink tails radiate OUTWARD!
+                const micelleCenters = [
+                    new THREE.Vector3(-8, -8, -8), new THREE.Vector3(8, -8, -8),
+                    new THREE.Vector3(-8, 8, -8),  new THREE.Vector3(8, 8, -8),
+                    new THREE.Vector3(-8, -8, 8),  new THREE.Vector3(8, -8, 8),
+                    new THREE.Vector3(-8, 8, 8),   new THREE.Vector3(8, 8, 8)
+                ];
 
-                    for(let i=0; i<22; i++) {
+                micelleCenters.forEach((center) => {
+                    // Central Water Molecule inside each inverse micelle core
+                    if (showWater) {
+                        for(let w=0; w<4; w++) {
+                            const wpos = new THREE.Vector3(
+                                center.x + (Math.random()-0.5)*1.2,
+                                center.y + (Math.random()-0.5)*1.2,
+                                center.z + (Math.random()-0.5)*1.2
+                            );
+                            waterPositions.push(wpos);
+                            const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                            waterMesh.position.copy(wpos);
+                            particleGroup.add(waterMesh);
+                        }
+                    }
+
+                    // Inverted micelle heads facing INWARD at R=3.2, tails pointing OUTWARD
+                    for(let i=0; i<20; i++) {
                         const theta = Math.random() * Math.PI * 2;
                         const phi = Math.random() * Math.PI;
-                        const r = 3.8;
+                        const r = 3.2;
 
-                        const hx = cx + r * Math.sin(phi) * Math.cos(theta);
-                        const hy = cy + r * Math.sin(phi) * Math.sin(theta);
-                        const hz = cz + r * Math.cos(phi);
+                        const hx = center.x + r * Math.sin(phi) * Math.cos(theta);
+                        const hy = center.y + r * Math.sin(phi) * Math.sin(theta);
+                        const hz = center.z + r * Math.cos(phi);
                         const hpos = new THREE.Vector3(hx, hy, hz);
                         headPositions.push(hpos);
 
@@ -453,115 +474,144 @@
                             const headMesh = new THREE.Mesh(headGeo, headMat);
                             headMesh.position.copy(hpos);
 
-                            const dir = new THREE.Vector3(hx - cx, hy - cy, hz - cz).normalize();
+                            // Vector pointing OUTWARD from micelle center for pink tails!
+                            const outDir = new THREE.Vector3(hx - center.x, hy - center.y, hz - center.z).normalize();
                             const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                            tailMesh.position.set(hx + dir.x * 1.3, hy + dir.y * 1.3, hz + dir.z * 1.3);
-                            tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+                            tailMesh.position.set(hx + outDir.x * 1.3, hy + outDir.y * 1.3, hz + outDir.z * 1.3);
+                            tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), outDir);
 
                             particleGroup.add(headMesh);
                             particleGroup.add(tailMesh);
                         }
-
-                        if (showWater) {
-                            const wr = 1.8;
-                            const wx = cx + wr * Math.sin(phi) * Math.cos(theta);
-                            const wy = cy + wr * Math.sin(phi) * Math.sin(theta);
-                            const wz = cz + wr * Math.cos(phi);
-                            const wpos = new THREE.Vector3(wx, wy, wz);
-                            waterPositions.push(wpos);
-
-                            const waterMesh = new THREE.Mesh(waterGeo, waterMat);
-                            waterMesh.position.copy(wpos);
-                            particleGroup.add(waterMesh);
-                        }
                     }
-                }
+                });
+
             } else if (F_spec < 1.45) {
-                // Inverse Hexagonal H_II (1.15 <= F_spec < 1.45)
-                const tubeCount = 5;
-                for(let t=0; t<tubeCount; t++) {
-                    const tx = (t - 2) * 8.0;
-                    for(let i=0; i<45; i++) {
-                        const angle = (i / 45) * Math.PI * 2;
-                        const z = ((i % 9) - 4.5) * 3.4;
-                        const r = 3.4;
+                // Stage 3: Inverse Hexagonal H_II (1.15 <= F_spec < 1.45, pH 6.0 Peak Fusogenic)
+                // 7 Parallel INVERTED CYLINDRICAL TUBES: Center tube + 6 surrounding hex tubes!
+                // Cyan heads face INWARD at R=3.2 around central water pipes; Pink tails point OUTWARD!
+                const tubeCenters = [
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(8.5, 0, 0),
+                    new THREE.Vector3(-8.5, 0, 0),
+                    new THREE.Vector3(4.25, 7.36, 0),
+                    new THREE.Vector3(-4.25, 7.36, 0),
+                    new THREE.Vector3(4.25, -7.36, 0),
+                    new THREE.Vector3(-4.25, -7.36, 0)
+                ];
 
-                        const hx = tx + r * Math.cos(angle);
-                        const hy = r * Math.sin(angle);
-                        const hz = z;
-                        const hpos = new THREE.Vector3(hx, hy, hz);
-                        headPositions.push(hpos);
-
-                        if (showLipids) {
-                            const headMesh = new THREE.Mesh(headGeo, headMat);
-                            headMesh.position.copy(hpos);
-
-                            // Radiation dir for pink tails pointing outward into dry matrix
-                            const dir = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
-                            const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                            tailMesh.position.set(hx + dir.x * 1.3, hy + dir.y * 1.3, hz);
-                            tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-
-                            particleGroup.add(headMesh);
-                            particleGroup.add(tailMesh);
-                        }
-
-                        if (showWater) {
-                            // Pure white water molecules inside central water cylinder
-                            const wr = 1.5;
-                            const wx = tx + wr * Math.cos(angle);
-                            const wy = wr * Math.sin(angle);
-                            const wpos = new THREE.Vector3(wx, wy, hz);
+                tubeCenters.forEach((tc) => {
+                    // Central Water Line running down center of tube
+                    if (showWater) {
+                        for(let z=-12; z<=12; z+=2.4) {
+                            const wpos = new THREE.Vector3(tc.x + (Math.random()-0.5)*0.6, tc.y + (Math.random()-0.5)*0.6, z);
                             waterPositions.push(wpos);
-
                             const waterMesh = new THREE.Mesh(waterGeo, waterMat);
                             waterMesh.position.copy(wpos);
                             particleGroup.add(waterMesh);
                         }
                     }
-                }
-            } else {
-                // Bicontinuous Cubic Q_2 (F_spec >= 1.45)
-                for(let i=0; i<220; i++) {
-                    const u = (i / 220) * Math.PI * 4;
-                    const v = (i % 20) / 20 * Math.PI * 2;
-                    const hx = 11.5 * Math.sin(u) * Math.cos(v);
-                    const hy = 11.5 * Math.sin(u) * Math.sin(v);
-                    const hz = 11.5 * Math.cos(u);
-                    const hpos = new THREE.Vector3(hx, hy, hz);
-                    headPositions.push(hpos);
 
-                    if (showLipids) {
-                        const headMesh = new THREE.Mesh(headGeo, headMat);
-                        headMesh.position.copy(hpos);
-                        particleGroup.add(headMesh);
+                    // Inverted cylindrical lipid ring: heads face INWARD, tails point OUTWARD into dry matrix!
+                    for(let z=-12; z<=12; z+=3.0) {
+                        for(let a=0; a<8; a++) {
+                            const angle = (a / 8) * Math.PI * 2;
+                            const r = 3.2;
 
-                        // Added missing Pink Tail Rods in Q_2 phase!
-                        const dir = new THREE.Vector3(hx, hy, hz).normalize();
-                        const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                        tailMesh.position.set(hx + dir.x * 1.3, hy + dir.y * 1.3, hz + dir.z * 1.3);
-                        tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-                        particleGroup.add(tailMesh);
+                            const hx = tc.x + r * Math.cos(angle);
+                            const hy = tc.y + r * Math.sin(angle);
+                            const hz = z;
+                            const hpos = new THREE.Vector3(hx, hy, hz);
+                            headPositions.push(hpos);
+
+                            if (showLipids) {
+                                const headMesh = new THREE.Mesh(headGeo, headMat);
+                                headMesh.position.copy(hpos);
+
+                                // Normal vector pointing OUTWARD from tube center axis into hydrophobic continuum!
+                                const outDir = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
+                                const tailMesh = new THREE.Mesh(tailGeo, tailMat);
+                                tailMesh.position.set(hx + outDir.x * 1.3, hy + outDir.y * 1.3, hz);
+                                tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), outDir);
+
+                                particleGroup.add(headMesh);
+                                particleGroup.add(tailMesh);
+                            }
+                        }
                     }
+                });
 
-                    if (showWater) {
-                        const wpos = new THREE.Vector3(hx * 0.82, hy * 0.82, hz * 0.82);
-                        waterPositions.push(wpos);
-                        const waterMesh = new THREE.Mesh(waterGeo, waterMat);
-                        waterMesh.position.copy(wpos);
-                        particleGroup.add(waterMesh);
+                // mRNA payload ejections
+                if (showLipids || layerMode === 'ALL') {
+                    for(let m=0; m<20; m++) {
+                        const mrnaMesh = new THREE.Mesh(mrnaGeo, mrnaMat);
+                        mrnaMesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*15);
+                        particleGroup.add(mrnaMesh);
+                    }
+                }
+
+            } else {
+                // Stage 4: Inverse Bicontinuous Cubic Q_2 (Schwarz P Minimal Surface: cos(x)+cos(y)+cos(z)=0)
+                // Cyan heads sitting on the 3D saddle minimal surface lining the 3D intersecting water tunnels!
+                // Pure white water molecules inside the 3D intersecting channels!
+                // Pink tails pointing along the surface gradient vector into internal lipid membrane sheet!
+                
+                const gridN = 14;
+                const scale = 3.8;
+                for(let ix=-gridN; ix<=gridN; ix+=2) {
+                    for(let iy=-gridN; iy<=gridN; iy+=2) {
+                        for(let iz=-gridN; iz<=gridN; iz+=2) {
+                            const x = (ix / gridN) * Math.PI;
+                            const y = (iy / gridN) * Math.PI;
+                            const z = (iz / gridN) * Math.PI;
+
+                            const f = Math.cos(x) + Math.cos(y) + Math.cos(z);
+                            if (Math.abs(f) < 0.28) {
+                                const hx = x * scale;
+                                const hy = y * scale;
+                                const hz = z * scale;
+                                const hpos = new THREE.Vector3(hx, hy, hz);
+                                headPositions.push(hpos);
+
+                                // Gradient normal vector: (-sin(x), -sin(y), -sin(z))
+                                const gx = -Math.sin(x);
+                                const gy = -Math.sin(y);
+                                const gz = -Math.sin(z);
+                                const gLen = Math.sqrt(gx*gx + gy*gy + gz*gz) || 1.0;
+                                const normalDir = new THREE.Vector3(gx/gLen, gy/gLen, gz/gLen);
+
+                                if (showLipids) {
+                                    const headMesh = new THREE.Mesh(headGeo, headMat);
+                                    headMesh.position.copy(hpos);
+                                    particleGroup.add(headMesh);
+
+                                    const tailMesh = new THREE.Mesh(tailGeo, tailMat);
+                                    tailMesh.position.set(hx + normalDir.x * 1.3, hy + normalDir.y * 1.3, hz + normalDir.z * 1.3);
+                                    tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normalDir);
+                                    particleGroup.add(tailMesh);
+                                }
+
+                                if (showWater) {
+                                    const wpos = new THREE.Vector3(hx - normalDir.x * 0.8, hy - normalDir.y * 0.8, hz - normalDir.z * 0.8);
+                                    waterPositions.push(wpos);
+                                    const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+                                    waterMesh.position.copy(wpos);
+                                    particleGroup.add(waterMesh);
+                                }
+                            }
+                        }
                     }
                 }
             }
 
             // Draw Fiedler Graph Edges (Hydrogen Bonding / Network Laplacian Connectivity)
             if (showGraph && headPositions.length > 0 && waterPositions.length > 0) {
-                const maxEdges = 120;
+                const maxEdges = 140;
                 let edgeCount = 0;
-                for(let i=0; i<headPositions.length; i++) {
-                    for(let j=0; j<waterPositions.length; j++) {
+                for(let i=0; i<headPositions.length; i+=2) {
+                    for(let j=0; j<waterPositions.length; j+=2) {
                         const dist = headPositions[i].distanceTo(waterPositions[j]);
-                        if (dist < 4.2 && edgeCount < maxEdges) {
+                        if (dist < 3.8 && edgeCount < maxEdges) {
                             const points = [headPositions[i], waterPositions[j]];
                             const edgeGeo = new THREE.BufferGeometry().setFromPoints(points);
                             const line = new THREE.Line(edgeGeo, edgeMat);
@@ -633,17 +683,17 @@
             // Dynamic HUD explanation for pH <= 6.2
             const infoBox = document.getElementById('struct-info-box');
             if (currentpH <= 6.2) {
-                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 低pH高曲率相]</strong><br>' +
-                    '・<strong>逆ヘキサゴナル (H_II) / バイコンティニュアス (Q_2) 相</strong><br>' +
-                    '・<strong>青球 ($NH^+$)</strong>: プロトン化頭部が水管内壁を包囲<br>' +
-                    '・<strong>ピンク柱 (Tails)</strong>: 疎水性尾部が放射状に乾燥コアを構築<br>' +
+                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 逆相メソ構造（極性流路）]</strong><br>' +
+                    '・<strong>逆ヘキサゴナル ($H_{II}$) / 逆バイコンティニュアス ($Q_2$) 相</strong><br>' +
+                    '・<strong>青球 ($NH^+$)</strong>: プロトン化頭部が水管・チャンネルの内壁を包囲<br>' +
+                    '・<strong>ピンク柱 (Tails)</strong>: 疎水尾部が全方向外側へ向き乾燥マトリックス形成<br>' +
                     '・<strong>純白球 ($H_2O$)</strong>: 中心水チャンネルの密集流路<br>' +
                     '・<strong>金球 (mRNA)</strong>: エンドソーム膜破砕に伴う細胞質脱出';
             } else {
-                infoBox.innerHTML = '<strong style="color:var(--accent-cyan);">[pH 7.4〜6.3 中性構造]</strong><br>' +
-                    '・<strong>逆ミセル相 (Fd3m) / ベシクル相 (L_α)</strong><br>' +
-                    '・非電荷脂質が油状コア・外被単分子膜を被覆。<br>' +
-                    '・水分子は内部キャビティに隔離配位。';
+                infoBox.innerHTML = '<strong style="color:var(--accent-cyan);">[pH 7.4〜6.3 中性コア・シェル]</strong><br>' +
+                    '・<strong>コア・シェル型ベシクル ($L_α$) / 逆ミセル相 ($Fd3m$)</strong><br>' +
+                    '・非電荷脂質の頭部が外被単分子膜を覆い、尾部がオイルコア内側を密封。<br>' +
+                    '・水分子は内部キャビティに孤立配位。';
             }
 
             // Chart update
