@@ -159,7 +159,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 14px 18px;
-            width: 290px;
+            width: 310px;
             pointer-events: none;
             backdrop-filter: blur(12px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
@@ -175,6 +175,17 @@
         .hud-val {
             font-family: monospace;
             font-weight: 700;
+        }
+
+        .structure-info-box {
+            margin-top: 10px;
+            padding: 8px 10px;
+            background: rgba(0, 229, 255, 0.07);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            color: var(--text-main);
+            line-height: 1.35;
         }
 
         .legend-box {
@@ -230,7 +241,7 @@
             <select id="layer-select">
                 <option value="ALL">🌟 全分子・ネットワーク（脂質＋水分子＋グラフエッジ＋mRNA）</option>
                 <option value="WATER">💧 水分子・水素結合ネットワークのみ (\lambda_2(Head-Water))</option>
-                <option value="LIPID">🧬 脂質二重層・メソ相骨格（親水基＋疎水尾部）</option>
+                <option value="LIPID">🧬 脂質二重層・メソ相骨格（親水頭部＋疎水尾部）</option>
                 <option value="GRAPH">⚡ Fiedler グラフ固有ベクトルエッジのみ</option>
             </select>
         </div>
@@ -241,13 +252,13 @@
         </div>
 
         <div class="metric-card">
-            <div class="metric-label">主物理指標: Fiedler Eigenvalue Ratio \mathcal{F}_{	ext{spec}}</div>
+            <div class="metric-label">主物理指標: Fiedler Eigenvalue Ratio \mathcal{F}_{\text{spec}}</div>
             <div class="metric-value" id="fspec-display">1.342</div>
             <div class="phase-badge" id="phase-badge">Inverse Hexagonal H_II</div>
         </div>
 
         <div class="metric-card" style="border-left-color: var(--accent-pink);">
-            <div class="metric-label">Fiedler 曲率 \kappa_{	ext{spec}} = \lambda_2(HW) - \lambda_2(TT)</div>
+            <div class="metric-label">Fiedler 曲率 \kappa_{\text{spec}} = \lambda_2(HW) - \lambda_2(TT)</div>
             <div class="metric-value" id="kspec-display" style="color:var(--accent-pink)">+0.850</div>
         </div>
 
@@ -261,7 +272,7 @@
         <div class="control-group">
             <div style="font-size:0.76rem; color:var(--text-muted); line-height:1.35;">
                 <strong style="color:var(--text-main);">Fiedler グラフ理論による解釈:</strong><br>
-                親水頭部-水分子ネットワークの接続度 $\lambda_2(	ext{HW})$ と疎水尾部剛性 $\lambda_2(	ext{TT})$ の比率 $\mathcal{F}_{	ext{spec}}$ で水分子配位・相転移・膜破砕を統一記述。
+                親水頭部-水分子ネットワークの接続度 $\lambda_2(\text{HW})$ と疎水尾部剛性 $\lambda_2(\text{TT})$ の比率 $\mathcal{F}_{\text{spec}}$ で水分子配位・相転移・膜破砕を統一記述。
             </div>
         </div>
     </div>
@@ -271,10 +282,19 @@
         
         <div id="hud-overlay">
             <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:10px; font-size:0.92rem; border-bottom:1px solid rgba(0,229,255,0.2); padding-bottom:4px;">Fiedler グラフスペクトル HUD</div>
-            <div class="hud-row"><span>\lambda_2(	ext{Head-Water}):</span><span class="hud-val" id="l2hw-hud" style="color:#00e5ff">2.45</span></div>
-            <div class="hud-row"><span>\lambda_2(	ext{Tail-Tail}):</span><span class="hud-val" id="l2tt-hud" style="color:#ff4081">1.82</span></div>
+            <div class="hud-row"><span>\lambda_2(\text{Head-Water}):</span><span class="hud-val" id="l2hw-hud" style="color:#00e5ff">2.45</span></div>
+            <div class="hud-row"><span>\lambda_2(\text{Tail-Tail}):</span><span class="hud-val" id="l2tt-hud" style="color:#ff4081">1.82</span></div>
             <div class="hud-row"><span>Cheeger 下限 h(G):</span><span class="hud-val" id="cheeger-hud" style="color:#ffd700">1.22</span></div>
             <div class="hud-row"><span>膜融合能 Fusogenic:</span><span class="hud-val" id="fuso-hud" style="color:#00ff88">98%</span></div>
+            
+            <div class="structure-info-box" id="struct-info-box">
+                <strong style="color:var(--accent-gold);">[pH ≤ 6.2 描画構造解説]</strong><br>
+                ・<strong>逆ヘキサゴナル相 ($H_{II}$) / バイコンティニュアス相 ($Q_2$)</strong><br>
+                ・プロトン化脂質 ($NH^+$) が中央水チャンネルの内壁を円筒状に包囲。<br>
+                ・水分子 ($H_2O$) が円筒管の中心に密集・一列配位。<br>
+                ・高密度 Fiedler 水素結合枝 ($\lambda_2 \uparrow$) が水チャンネルを強力連結。<br>
+                ・アニオン膜と融合ストークを形成し mRNA 爆発的脱出が進行中。
+            </div>
         </div>
 
         <div class="legend-box">
@@ -604,6 +624,22 @@
             document.getElementById('l2tt-hud').innerText = dataPoint.lambda_2_tail_tail.toFixed(2);
             document.getElementById('cheeger-hud').innerText = dataPoint.cheeger_bound.toFixed(2);
             document.getElementById('fuso-hud').innerText = Math.round(dataPoint.fusogenic_score * 100) + '%';
+
+            // Dynamic HUD explanation for pH <= 6.2
+            const infoBox = document.getElementById('struct-info-box');
+            if (currentpH <= 6.2) {
+                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 描画構造解説]</strong><br>' +
+                    '・<strong>逆ヘキサゴナル相 (H_II) / バイコンティニュアス相 (Q_2)</strong><br>' +
+                    '・プロトン化脂質 (NH+) が中央水チャンネルの内壁を円筒状に包囲。<br>' +
+                    '・水分子 (H2O) が円筒管の中心に密集・一列配位。<br>' +
+                    '・高密度 Fiedler 水素結合枝 (λ2 ↑) が水チャンネルを強力連結。<br>' +
+                    '・アニオン膜と融合ストークを形成し mRNA 爆発的脱出が進行中。';
+            } else {
+                infoBox.innerHTML = '<strong style="color:var(--accent-cyan);">[pH 7.4〜6.3 描画構造解説]</strong><br>' +
+                    '・<strong>逆ミセル相 (Fd3m) / 二重層ベシクル相 (L_α)</strong><br>' +
+                    '・非電荷脂質が外側で油状コア・シェルを被覆。<br>' +
+                    '・水分子は内部極性キャビティに局所分散・隔離。';
+            }
 
             // Chart update
             if (chartInstance) {
