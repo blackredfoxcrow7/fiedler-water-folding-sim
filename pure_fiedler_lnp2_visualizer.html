@@ -393,7 +393,6 @@
                     const innerR = 9.8;
                     const numLipidsPerLeaflet = 160;
 
-                    // 1. Outer Leaflet (親水頭部が外側の水相に面し、ピンク尾部が膜内部へ)
                     for(let i=0; i<numLipidsPerLeaflet; i++) {
                         const phi = Math.acos(-1 + (2 * i) / numLipidsPerLeaflet);
                         const theta = Math.sqrt(numLipidsPerLeaflet * Math.PI) * phi;
@@ -417,7 +416,6 @@
                             particleGroup.add(tailMesh);
                         }
 
-                        // External Water Medium surrounding the vesicle
                         if (showWater && i % 2 === 0) {
                             const wr = outerR + 2.0 + Math.sin(i * 3) * 0.6;
                             const wx = wr * Math.sin(phi) * Math.cos(theta + 0.1);
@@ -432,7 +430,6 @@
                         }
                     }
 
-                    // 2. Inner Leaflet (親水頭部が内側水相コアに面し、ピンク尾部が膜内部へ)
                     for(let i=0; i<numLipidsPerLeaflet; i++) {
                         const phi = Math.acos(-1 + (2 * i) / numLipidsPerLeaflet);
                         const theta = Math.sqrt(numLipidsPerLeaflet * Math.PI) * phi;
@@ -449,7 +446,6 @@
 
                             const normal = hpos.clone().normalize();
                             const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                            // Tails point OUTWARD into the hydrophobic membrane center!
                             tailMesh.position.set(hx + normal.x * 1.1, hy + normal.y * 1.1, hz + normal.z * 1.1);
                             tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
 
@@ -458,7 +454,6 @@
                         }
                     }
 
-                    // 3. Internal Aqueous Core Water + mRNA inside the vesicle
                     if (showWater) {
                         for(let w=0; w<50; w++) {
                             const wr = Math.random() * 6.5;
@@ -586,8 +581,12 @@
                     }
                 });
 
-            } else if (F_spec < 1.45) {
-                // Stage 3: Inverse Hexagonal H_II (1.15 <= F_spec < 1.45, pH 6.0 Peak Fusogenic)
+            } else {
+                // Continuous Topological Morphing between Inverse Hexagonal H_II and Bicontinuous Cubic Q_2 (F_spec >= 1.15)
+                // Smooth interpolation factor morphFactor in [0, 1] when F_spec transitions from 1.15 to 1.65
+                const morphFactor = Math.min(Math.max((F_spec - 1.15) / 0.50, 0.0), 1.0);
+
+                // 1. Base H_II Tubes
                 const tubeCenters = [
                     new THREE.Vector3(0, 0, 0),
                     new THREE.Vector3(8.5, 0, 0),
@@ -601,7 +600,11 @@
                 tubeCenters.forEach((tc) => {
                     if (showWater) {
                         for(let z=-12; z<=12; z+=2.4) {
-                            const wpos = new THREE.Vector3(tc.x + (Math.random()-0.5)*0.6, tc.y + (Math.random()-0.5)*0.6, z);
+                            // As morphFactor -> 1, water tubes interconnect outward into 3D channels
+                            const wpos_H = new THREE.Vector3(tc.x + (Math.random()-0.5)*0.6, tc.y + (Math.random()-0.5)*0.6, z);
+                            const wpos_Q = wpos_H.clone().multiplyScalar(1.0 + 0.35 * morphFactor * Math.sin(z * 0.4));
+                            const wpos = wpos_H.clone().lerp(wpos_Q, morphFactor);
+
                             waterPositions.push(wpos);
                             const waterMesh = new THREE.Mesh(waterGeo, waterMat);
                             waterMesh.position.copy(wpos);
@@ -612,11 +615,23 @@
                     for(let z=-12; z<=12; z+=3.0) {
                         for(let a=0; a<8; a++) {
                             const angle = (a / 8) * Math.PI * 2;
-                            const r = 3.2;
+                            const r_H = 3.2;
 
-                            const hx = tc.x + r * Math.cos(angle);
-                            const hy = tc.y + r * Math.sin(angle);
-                            const hz = z;
+                            // H_II cylinder position
+                            const hx_H = tc.x + r_H * Math.cos(angle);
+                            const hy_H = tc.y + r_H * Math.sin(angle);
+                            const hz_H = z;
+
+                            // Schwarz P Q_2 Target position: bulge out interconnecting necks between tubes!
+                            const bulge = 1.0 + 0.45 * morphFactor * (Math.cos(angle * 3) + Math.sin(z * 0.3));
+                            const hx_Q = tc.x + r_H * bulge * Math.cos(angle);
+                            const hy_Q = tc.y + r_H * bulge * Math.sin(angle);
+                            const hz_Q = z * (1.0 - 0.15 * morphFactor);
+
+                            // Smooth Lerp between H_II and Q_2
+                            const hx = hx_H * (1 - morphFactor) + hx_Q * morphFactor;
+                            const hy = hy_H * (1 - morphFactor) + hy_Q * morphFactor;
+                            const hz = hz_H * (1 - morphFactor) + hz_Q * morphFactor;
                             const hpos = new THREE.Vector3(hx, hy, hz);
                             headPositions.push(hpos);
 
@@ -624,9 +639,13 @@
                                 const headMesh = new THREE.Mesh(headGeo, headMat);
                                 headMesh.position.copy(hpos);
 
-                                const outDir = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
+                                // Normal vector interpolation
+                                const outDir_H = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0).normalize();
+                                const outDir_Q = new THREE.Vector3(Math.cos(angle), Math.sin(angle), 0.3 * Math.sin(z)).normalize();
+                                const outDir = outDir_H.clone().lerp(outDir_Q, morphFactor).normalize();
+
                                 const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                                tailMesh.position.set(hx + outDir.x * 1.3, hy + outDir.y * 1.3, hz);
+                                tailMesh.position.set(hx + outDir.x * 1.3, hy + outDir.y * 1.3, hz + outDir.z * 1.3);
                                 tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), outDir);
 
                                 particleGroup.add(headMesh);
@@ -641,54 +660,6 @@
                         const mrnaMesh = new THREE.Mesh(mrnaGeo, mrnaMat);
                         mrnaMesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*15);
                         particleGroup.add(mrnaMesh);
-                    }
-                }
-
-            } else {
-                // Stage 4: Inverse Bicontinuous Cubic Q_2 (Schwarz P Minimal Surface)
-                const gridN = 14;
-                const scale = 3.8;
-                for(let ix=-gridN; ix<=gridN; ix+=2) {
-                    for(let iy=-gridN; iy<=gridN; iy+=2) {
-                        for(let iz=-gridN; iz<=gridN; iz+=2) {
-                            const x = (ix / gridN) * Math.PI;
-                            const y = (iy / gridN) * Math.PI;
-                            const z = (iz / gridN) * Math.PI;
-
-                            const f = Math.cos(x) + Math.cos(y) + Math.cos(z);
-                            if (Math.abs(f) < 0.28) {
-                                const hx = x * scale;
-                                const hy = y * scale;
-                                const hz = z * scale;
-                                const hpos = new THREE.Vector3(hx, hy, hz);
-                                headPositions.push(hpos);
-
-                                const gx = -Math.sin(x);
-                                const gy = -Math.sin(y);
-                                const gz = -Math.sin(z);
-                                const gLen = Math.sqrt(gx*gx + gy*gy + gz*gz) || 1.0;
-                                const normalDir = new THREE.Vector3(gx/gLen, gy/gLen, gz/gLen);
-
-                                if (showLipids) {
-                                    const headMesh = new THREE.Mesh(headGeo, headMat);
-                                    headMesh.position.copy(hpos);
-                                    particleGroup.add(headMesh);
-
-                                    const tailMesh = new THREE.Mesh(tailGeo, tailMat);
-                                    tailMesh.position.set(hx + normalDir.x * 1.3, hy + normalDir.y * 1.3, hz + normalDir.z * 1.3);
-                                    tailMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normalDir);
-                                    particleGroup.add(tailMesh);
-                                }
-
-                                if (showWater) {
-                                    const wpos = new THREE.Vector3(hx - normalDir.x * 0.8, hy - normalDir.y * 0.8, hz - normalDir.z * 0.8);
-                                    waterPositions.push(wpos);
-                                    const waterMesh = new THREE.Mesh(waterGeo, waterMat);
-                                    waterMesh.position.copy(wpos);
-                                    particleGroup.add(waterMesh);
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -778,12 +749,11 @@
             // Dynamic HUD explanation
             const infoBox = document.getElementById('struct-info-box');
             if (currentpH <= 6.2) {
-                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 逆相メソ構造（極性流路）]</strong><br>' +
-                    '・<strong>逆ヘキサゴナル ($H_{II}$) / 逆バイコンティニュアス ($Q_2$) 相</strong><br>' +
-                    '・<strong>青球 ($NH^+$)</strong>: プロトン化頭部が水管・チャンネルの内壁を包囲<br>' +
-                    '・<strong>ピンク柱 (Tails)</strong>: 疎水尾部が全方向外側へ向き乾燥マトリックス形成<br>' +
-                    '・<strong>純白球 ($H_2O$)</strong>: 中心水チャンネルの密集流路<br>' +
-                    '・<strong>金球 (mRNA)</strong>: エンドソーム膜破砕に伴う細胞質脱出';
+                infoBox.innerHTML = '<strong style="color:var(--accent-gold);">[pH ≤ 6.2 連続相転移モーフィング]</strong><br>' +
+                    '・<strong>逆ヘキサゴナル ($H_{II}$) $\\to$ 逆バイコンティニュアス ($Q_2$) 連続モーフィング</strong><br>' +
+                    '・六方水管が滑らかに開口・架橋し 3D シュワルツ P 極小曲面構造へ変形。<br>' +
+                    '・<strong>青球 ($NH^+$)</strong>: 包囲頭部 / <strong>ピンク柱</strong>: 疎水尾部<br>' +
+                    '・<strong>純白球 ($H_2O$)</strong>: 水チャンネル / <strong>金球 (mRNA)</strong>: 脱出放出';
             } else if (neutralMode === 'BILAYER') {
                 infoBox.innerHTML = '<strong style="color:var(--accent-cyan);">[pH 7.4〜6.3 ２分子膜ベシクル相 ($L_α$)]</strong><br>' +
                     '・<strong>外側単分子膜</strong>: シアン頭部が外部水相に面しピンク尾部が内側へ。<br>' +
