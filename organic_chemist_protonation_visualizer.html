@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>有機化学者のための段階的プロトン化＆水チャネル形成3Dモデル | Organic Chemist Protonation Visualizer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg-dark: #070a12;
+            --panel-bg: rgba(14, 22, 38, 0.90);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #00f0ff;
+            --accent-pink: #ff2a85;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --text-light: #f8fafc;
+            --text-dim: #94a3b8;
+            --border-glow: rgba(59, 130, 246, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .ui-panel {
+            position: absolute;
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 18px 22px;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+        }
+
+        #header-panel {
+            top: 15px;
+            left: 15px;
+            max-width: 520px;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            margin-bottom: 8px;
+        }
+
+        #timeline-panel {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(850px, 92vw);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        button.step-btn {
+            background: rgba(20, 30, 50, 0.8);
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        button.step-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        button.step-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(59, 130, 246, 0.5);
+        }
+
+        .step-description-box {
+            background: rgba(10, 16, 28, 0.85);
+            border-radius: 8px;
+            padding: 12px 16px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.84rem;
+            line-height: 1.45;
+            color: var(--text-light);
+        }
+
+        #details-panel {
+            top: 15px;
+            right: 15px;
+            width: 340px;
+        }
+
+        .chem-struct {
+            background: rgba(5, 10, 20, 0.8);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            border: 1px dashed var(--accent-cyan);
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+            text-align: center;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background: rgba(20, 30, 50, 0.5);
+            padding: 8px 10px;
+            border-radius: 6px;
+        }
+
+        .stat-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.nitrogen { background: var(--accent-blue); box-shadow: 0 0 6px var(--accent-blue); }
+        .dot.proton { background: var(--accent-pink); box-shadow: 0 0 8px var(--accent-pink); }
+        .dot.oxygen { background: #ef4444; }
+        .dot.carbon { background: #64748b; }
+        .dot.hbond { background: var(--accent-cyan); }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="header-panel" class="ui-panel">
+        <div class="badge">有機化学者のための分子構造視点モデル</div>
+        <h1>三級アミンプロトン化＆水チャネル形成 段階モデル</h1>
+        <div class="subtitle">
+            球モデル（物理視点）ではなく、明示的な分子構造式（N原子, Cアルキル鎖, O-H...O水分子）に基づき、プロトン化 (N → NH+) から水引き込み・1D水素結合ワイヤー形成までのプロセスを一歩一歩可視化
+        </div>
+    </div>
+
+    <div id="timeline-panel" class="ui-panel">
+        <div class="step-buttons">
+            <button id="btn-s1" class="step-btn active" onclick="setStep(1)">Step 1<br>中性二分子膜 (pH 7.4)</button>
+            <button id="btn-s2" class="step-btn" onclick="setStep(2)">Step 2<br>プロトン添加 (N+H+)</button>
+            <button id="btn-s3" class="step-btn" onclick="setStep(3)">Step 3<br>静電反発＆水引き込み</button>
+            <button id="btn-s4" class="step-btn" onclick="setStep(4)">Step 4<br>1D水チャネル完成 (H_II)</button>
+        </div>
+        <div class="step-description-box" id="step-desc">
+            【Step 1: 中性状態 (pH 7.4)】三級アミン窒素原子 (N) は非プロトン化（無電荷）。脂質頭部は緊密に充填し、水分子は膜外へ排除された安定な二分子膜形態。
+        </div>
+    </div>
+
+    <div id="details-panel" class="ui-panel">
+        <div class="stat-title" style="font-size:0.75rem; color:var(--text-dim);">化学構造式変化</div>
+        <div class="chem-struct" id="chem-formula">R₂N:  +  H₂O  (非プロトン化)</div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim);">充填パラメータ P</div>
+                <div class="stat-val" id="val-p">0.95</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim);">水素結合数 (H-Bonds)</div>
+                <div class="stat-val" id="val-hbonds">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim);">頭部径 r_head</div>
+                <div class="stat-val" id="val-rhead">2.2 Å</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim);">相形態</div>
+                <div class="stat-val" id="val-phase" style="font-size:0.9rem; color:var(--accent-green);">Lamellar</div>
+            </div>
+        </div>
+
+        <div class="stat-title" style="font-size:0.75rem; color:var(--text-dim); margin-top:12px;">分子構成要素（明示的原子）</div>
+        <div class="legend-grid">
+            <div class="legend-item"><div class="dot nitrogen"></div>窒素原子 (N) / 三級アミン</div>
+            <div class="legend-item"><div class="dot proton"></div>付加プロトン (H+) 陽電荷</div>
+            <div class="legend-item"><div class="dot oxygen"></div>水分子酸素 (O, H2O)</div>
+            <div class="legend-item"><div class="dot carbon"></div>炭素鎖 (C, アルキル尾部)</div>
+            <div class="legend-item" style="grid-column: span 2;"><div class="dot hbond"></div>水素結合 (O-H...O / N+-H...O)</div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let explicitMoleculeGroup;
+        let currentStep = 1;
+
+        const STEP_DETAILS = {
+            1: {
+                desc: "【Step 1: 中性状態 (pH 7.4)】三級アミン窒素原子 (N) は非プロトン化（無電荷）。脂質頭部は緊密に充填し、水分子は膜外へ排除された安定な疎水性二分子膜形態。",
+                formula: "R₂N:  +  H₂O  (中性・疎水密充填)",
+                p: "0.95", hbonds: "0", rhead: "2.2 Å", phase: "Lamellar (L_α)", color: "#10b981"
+            },
+            2: {
+                desc: "【Step 2: プロトン添加 ($N + H^+ \\to NH^+$)】環境酸性化により、プロトン (H+) が三級アミン窒素原子 N に直接結合。窒素原子上に局所陽電荷 (+) が発生。",
+                formula: "R₂N:  +  H⁺  →  R₂NH⁺ (陽電荷発生)",
+                p: "1.17", hbonds: "0", rhead: "3.0 Å", phase: "Protonated L_α", color: "#f59e0b"
+            },
+            3: {
+                desc: "【Step 3: 静電反発と水引き込み】頭部同士の陽電荷 (+...+) 反発により極性頭部間隔が拡大。水分子 (H₂O) が内部へ吸引され、N⁺-H···O-H 水素結合網を形成し始める。",
+                formula: "R₂NH⁺ ··· O-H₂ (水引き込み＆H-Bond)",
+                p: "1.39", hbonds: "23", rhead: "3.8 Å", phase: "Water Influx", color: "#3b82f6"
+            },
+            4: {
+                desc: "【Step 4: コーン型変形と1D水チャネル完成】脂質尾部がコーン型（逆テーパー）に開出し、水分子がZ軸チャネル内に整列。連通した1D水素結合ワイヤー（Grotthuss伝導路）が完成！",
+                formula: "1D Water Wire Channel [H-O-H]ₙ (H_II)",
+                p: "1.61", hbonds: "23", rhead: "4.7 Å", phase: "Inverted Hex (H_II)", color: "#00f0ff"
+            }
+        };
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x070a12, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(18, 14, 25);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const d1 = new THREE.DirectionalLight(0x00f0ff, 0.8);
+            d1.position.set(15, 25, 15);
+            scene.add(d1);
+            const d2 = new THREE.DirectionalLight(0xff2a85, 0.5);
+            d2.position.set(-15, -15, -15);
+            scene.add(d2);
+
+            buildExplicitMolecules();
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function setStep(step) {
+            currentStep = step;
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`btn-s${i}`).classList.toggle('active', i === step);
+            }
+
+            const info = STEP_DETAILS[step];
+            document.getElementById('step-desc').innerText = info.desc;
+            document.getElementById('chem-formula').innerText = info.formula;
+            document.getElementById('val-p').innerText = info.p;
+            document.getElementById('val-hbonds').innerText = info.hbonds;
+            document.getElementById('val-rhead').innerText = info.rhead;
+            document.getElementById('val-phase').innerText = info.phase;
+            document.getElementById('val-phase').style.color = info.color;
+
+            buildExplicitMolecules();
+        }
+
+        function buildExplicitMolecules() {
+            if (explicitMoleculeGroup) scene.remove(explicitMoleculeGroup);
+            explicitMoleculeGroup = new THREE.Group();
+
+            const nLipids = 6;
+            const nWater = 20;
+
+            const progress = (currentStep - 1) / 3.0;
+            const rHead = 2.2 + 2.5 * progress;
+            const splay = 0.1 + 0.5 * progress;
+            const isProtonated = currentStep >= 2;
+
+            // Materials
+            const nMat = new THREE.MeshStandardMaterial({
+                color: isProtonated ? 0xff2a85 : 0x3b82f6,
+                emissive: isProtonated ? 0x880033 : 0x001144,
+                roughness: 0.2
+            });
+            const protonMat = new THREE.MeshStandardMaterial({ color: 0xff0055, emissive: 0xff0055, emissiveIntensity: 1.0 });
+            const cMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 });
+            const oMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 });
+            const hWaterMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+            const bondMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, linewidth: 2 });
+            const hBondMat = new THREE.LineDashedMaterial({ color: 0x00f0ff, dashSize: 0.4, gapSize: 0.2, linewidth: 2 });
+
+            const nPosList = [];
+
+            // 1. Explicit Surfactant Molecules (SM-102 Ionizable Lipid)
+            for (let i = 0; i < nLipids; i++) {
+                const angle = (2 * Math.PI / nLipids) * i;
+                const nx = rHead * Math.cos(angle);
+                const ny = rHead * Math.sin(angle);
+                const nz = 0.0;
+                const nPos = new THREE.Vector3(nx, ny, nz);
+                nPosList.push(nPos);
+
+                // Nitrogen N atom sphere
+                const nGeom = new THREE.SphereGeometry(0.7, 16, 16);
+                const nMesh = new THREE.Mesh(nGeom, nMat);
+                nMesh.position.copy(nPos);
+                explicitMoleculeGroup.add(nMesh);
+
+                // Attached Proton H+ if step >= 2
+                if (isProtonated) {
+                    const pGeom = new THREE.SphereGeometry(0.35, 12, 12);
+                    const pMesh = new THREE.Mesh(pGeom, protonMat);
+                    const pPos = new THREE.Vector3(nx + 0.9 * Math.cos(angle), ny + 0.9 * Math.sin(angle), 0.7);
+                    pMesh.position.copy(pPos);
+                    explicitMoleculeGroup.add(pMesh);
+
+                    // N-H bond line
+                    const lineG = new THREE.BufferGeometry().setFromPoints([nPos, pPos]);
+                    explicitMoleculeGroup.add(new THREE.Line(lineG, bondMat));
+                }
+
+                // Dual Hydrocarbon Tails (C1-C5 chains)
+                for (let branch of [-1, 1]) {
+                    let prevPos = nPos.clone();
+                    for (let c = 1; c <= 5; c++) {
+                        const dist = c * 1.5;
+                        const cx = nx + (dist * Math.cos(angle + branch * splay));
+                        const cy = ny + (dist * Math.sin(angle + branch * splay));
+                        const cz = -c * 1.3;
+                        const cPos = new THREE.Vector3(cx, cy, cz);
+
+                        const cGeom = new THREE.SphereGeometry(0.4, 12, 12);
+                        const cMesh = new THREE.Mesh(cGeom, cMat);
+                        cMesh.position.copy(cPos);
+                        explicitMoleculeGroup.add(cMesh);
+
+                        // C-C bond
+                        const lineG = new THREE.BufferGeometry().setFromPoints([prevPos, cPos]);
+                        explicitMoleculeGroup.add(new THREE.Line(lineG, bondMat));
+                        prevPos = cPos;
+                    }
+                }
+            }
+
+            // 2. Explicit Water Molecules (H2O V-shape) & H-Bonds
+            const waterPositions = [];
+            for (let w = 0; w < nWater; w++) {
+                let ox, oy, oz;
+                if (currentStep === 1) {
+                    // Water excluded outside bilayer
+                    const z = (Math.random() - 0.5) * 16;
+                    const r = rHead + 5.0 + Math.random() * 5;
+                    const a = Math.random() * Math.PI * 2;
+                    ox = r * Math.cos(a);
+                    oy = r * Math.sin(a);
+                    oz = z;
+                } else if (currentStep === 2) {
+                    // Water approaching
+                    const z = (Math.random() - 0.5) * 12;
+                    const r = rHead * (0.8 + Math.random() * 0.8);
+                    const a = Math.random() * Math.PI * 2;
+                    ox = r * Math.cos(a);
+                    oy = r * Math.sin(a);
+                    oz = z;
+                } else {
+                    // Steps 3 & 4: Water molecules line up inside the interior Z-axis channel
+                    oz = (w / (nWater - 1)) * 20 - 10;
+                    const r = Math.random() * 1.6;
+                    const a = Math.random() * Math.PI * 2;
+                    ox = r * Math.cos(a);
+                    oy = r * Math.sin(a);
+                }
+
+                const oPos = new THREE.Vector3(ox, oy, oz);
+                waterPositions.push(oPos);
+
+                // Oxygen O atom
+                const oGeom = new THREE.SphereGeometry(0.5, 12, 12);
+                const oMesh = new THREE.Mesh(oGeom, oMat);
+                oMesh.position.copy(oPos);
+                explicitMoleculeGroup.add(oMesh);
+
+                // 2 Hydrogens (H-O-H geometry)
+                const h1Pos = new THREE.Vector3(ox + 0.7, oy + 0.4, oz + 0.2);
+                const h2Pos = new THREE.Vector3(ox - 0.7, oy + 0.4, oz - 0.2);
+
+                const hGeom = new THREE.SphereGeometry(0.25, 10, 10);
+                const h1Mesh = new THREE.Mesh(hGeom, hWaterMat);
+                h1Mesh.position.copy(h1Pos);
+                explicitMoleculeGroup.add(h1Mesh);
+
+                const h2Mesh = new THREE.Mesh(hGeom, hWaterMat);
+                h2Mesh.position.copy(h2Pos);
+                explicitMoleculeGroup.add(h2Mesh);
+
+                // O-H bonds
+                explicitMoleculeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([oPos, h1Pos]), bondMat));
+                explicitMoleculeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([oPos, h2Pos]), bondMat));
+            }
+
+            // H-Bond Lines (O-H...O chain along Z-axis)
+            if (currentStep >= 3) {
+                for (let i = 0; i < waterPositions.length - 1; i++) {
+                    const lineG = new THREE.BufferGeometry().setFromPoints([waterPositions[i], waterPositions[i+1]]);
+                    const line = new THREE.Line(lineG, hBondMat);
+                    line.computeLineDistances();
+                    explicitMoleculeGroup.add(line);
+                }
+            }
+
+            scene.add(explicitMoleculeGroup);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (explicitMoleculeGroup) {
+                explicitMoleculeGroup.rotation.y += 0.003;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

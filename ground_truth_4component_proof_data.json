@@ -1,0 +1,371 @@
+{
+  "angles": [
+    0.0,
+    10.0,
+    20.0,
+    30.0,
+    40.0,
+    50.0,
+    60.0,
+    70.0,
+    80.0,
+    90.0,
+    100.0,
+    110.0,
+    120.0,
+    130.0,
+    140.0,
+    150.0,
+    160.0,
+    170.0,
+    180.0
+  ],
+  "pH_7_4": [
+    {
+      "theta_deg": 0.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 4.0,
+      "E_dspc_bridge": -0.0,
+      "E_peg_steric": 0.0,
+      "total_F_multi": 6.080389270323909
+    },
+    {
+      "theta_deg": 10.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 3.567901234567901,
+      "E_dspc_bridge": -0.17431148549531633,
+      "E_peg_steric": 0.037980617469479845,
+      "total_F_multi": 5.511959636865975
+    },
+    {
+      "theta_deg": 20.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 3.1604938271604937,
+      "E_dspc_bridge": -0.34729635533386066,
+      "E_peg_steric": 0.150768448035229,
+      "total_F_multi": 5.044355190185771
+    },
+    {
+      "theta_deg": 30.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 2.777777777777778,
+      "E_dspc_bridge": -0.5176380902050415,
+      "E_peg_steric": 0.3349364905389033,
+      "total_F_multi": 4.67546544843555
+    },
+    {
+      "theta_deg": 40.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 2.419753086419753,
+      "E_dspc_bridge": -0.6840402866513374,
+      "E_peg_steric": 0.5848888922025548,
+      "total_F_multi": 4.40099096229488
+    },
+    {
+      "theta_deg": 50.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 2.0864197530864197,
+      "E_dspc_bridge": -0.8452365234813989,
+      "E_peg_steric": 0.8930309757836518,
+      "total_F_multi": 4.2146034757125825
+    },
+    {
+      "theta_deg": 60.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 1.7777777777777777,
+      "E_dspc_bridge": -0.9999999999999999,
+      "E_peg_steric": 1.2499999999999998,
+      "total_F_multi": 4.108167048101687
+    },
+    {
+      "theta_deg": 70.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 1.4938271604938274,
+      "E_dspc_bridge": -1.147152872702092,
+      "E_peg_steric": 1.6449496416858278,
+      "total_F_multi": 4.072013199801472
+    },
+    {
+      "theta_deg": 80.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 1.234567901234568,
+      "E_dspc_bridge": -1.2855752193730785,
+      "E_peg_steric": 2.065879555832674,
+      "total_F_multi": 4.095261508018073
+    },
+    {
+      "theta_deg": 90.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 1.0,
+      "E_dspc_bridge": -1.414213562373095,
+      "E_peg_steric": 2.4999999999999996,
+      "total_F_multi": 4.166175707950814
+    },
+    {
+      "theta_deg": 100.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.7901234567901234,
+      "E_dspc_bridge": -1.532088886237956,
+      "E_peg_steric": 2.9341204441673256,
+      "total_F_multi": 4.272544285043403
+    },
+    {
+      "theta_deg": 110.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.6049382716049383,
+      "E_dspc_bridge": -1.6383040885779836,
+      "E_peg_steric": 3.3550503583141715,
+      "total_F_multi": 4.402073811665036
+    },
+    {
+      "theta_deg": 120.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.4444444444444444,
+      "E_dspc_bridge": -1.7320508075688772,
+      "E_peg_steric": 3.7499999999999996,
+      "total_F_multi": 4.542782907199476
+    },
+    {
+      "theta_deg": 130.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.308641975308642,
+      "E_dspc_bridge": -1.8126155740732999,
+      "E_peg_steric": 4.106969024216348,
+      "total_F_multi": 4.6833846957756
+    },
+    {
+      "theta_deg": 140.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.19753086419753085,
+      "E_dspc_bridge": -1.8793852415718166,
+      "E_peg_steric": 4.415111107797444,
+      "total_F_multi": 4.8136460007470685
+    },
+    {
+      "theta_deg": 150.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.1111111111111111,
+      "E_dspc_bridge": -1.9318516525781366,
+      "E_peg_steric": 4.665063509461097,
+      "total_F_multi": 4.924712238317982
+    },
+    {
+      "theta_deg": 160.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.04938271604938271,
+      "E_dspc_bridge": -1.969615506024416,
+      "E_peg_steric": 4.84923155196477,
+      "total_F_multi": 5.009388032313646
+    },
+    {
+      "theta_deg": 170.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.012345679012345678,
+      "E_dspc_bridge": -1.992389396183491,
+      "E_peg_steric": 4.962019382530521,
+      "total_F_multi": 5.062364935683285
+    },
+    {
+      "theta_deg": 180.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.0,
+      "E_dspc_bridge": -2.0,
+      "E_peg_steric": 5.0,
+      "total_F_multi": 5.080389270323909
+    }
+  ],
+  "pH_5_5": [
+    {
+      "theta_deg": 0.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 8.0,
+      "E_chol_bending": 4.0,
+      "E_dspc_bridge": -0.0,
+      "E_peg_steric": 0.0,
+      "total_F_multi": 14.08038927032391
+    },
+    {
+      "theta_deg": 10.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 7.302754058018735,
+      "E_chol_bending": 3.567901234567901,
+      "E_dspc_bridge": -0.17431148549531633,
+      "E_peg_steric": 0.037980617469479845,
+      "total_F_multi": 12.81471369488471
+    },
+    {
+      "theta_deg": 20.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 6.610814578664558,
+      "E_chol_bending": 3.1604938271604937,
+      "E_dspc_bridge": -0.34729635533386066,
+      "E_peg_steric": 0.150768448035229,
+      "total_F_multi": 11.65516976885033
+    },
+    {
+      "theta_deg": 30.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 5.929447639179834,
+      "E_chol_bending": 2.777777777777778,
+      "E_dspc_bridge": -0.5176380902050415,
+      "E_peg_steric": 0.3349364905389033,
+      "total_F_multi": 10.604913087615383
+    },
+    {
+      "theta_deg": 40.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 5.263838853394651,
+      "E_chol_bending": 2.419753086419753,
+      "E_dspc_bridge": -0.6840402866513374,
+      "E_peg_steric": 0.5848888922025548,
+      "total_F_multi": 9.664829815689531
+    },
+    {
+      "theta_deg": 50.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 4.619053906074404,
+      "E_chol_bending": 2.0864197530864197,
+      "E_dspc_bridge": -0.8452365234813989,
+      "E_peg_steric": 0.8930309757836518,
+      "total_F_multi": 8.833657381786987
+    },
+    {
+      "theta_deg": 60.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 4.0,
+      "E_chol_bending": 1.7777777777777777,
+      "E_dspc_bridge": -0.9999999999999999,
+      "E_peg_steric": 1.2499999999999998,
+      "total_F_multi": 8.108167048101686
+    },
+    {
+      "theta_deg": 70.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 3.4113885091916316,
+      "E_chol_bending": 1.4938271604938274,
+      "E_dspc_bridge": -1.147152872702092,
+      "E_peg_steric": 1.6449496416858278,
+      "total_F_multi": 7.483401708993104
+    },
+    {
+      "theta_deg": 80.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 2.857699122507686,
+      "E_chol_bending": 1.234567901234568,
+      "E_dspc_bridge": -1.2855752193730785,
+      "E_peg_steric": 2.065879555832674,
+      "total_F_multi": 6.952960630525759
+    },
+    {
+      "theta_deg": 90.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 2.3431457505076203,
+      "E_chol_bending": 1.0,
+      "E_dspc_bridge": -1.414213562373095,
+      "E_peg_steric": 2.4999999999999996,
+      "total_F_multi": 6.509321458458434
+    },
+    {
+      "theta_deg": 100.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 1.871644455048176,
+      "E_chol_bending": 0.7901234567901234,
+      "E_dspc_bridge": -1.532088886237956,
+      "E_peg_steric": 2.9341204441673256,
+      "total_F_multi": 6.144188740091579
+    },
+    {
+      "theta_deg": 110.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 1.4467836456880656,
+      "E_chol_bending": 0.6049382716049383,
+      "E_dspc_bridge": -1.6383040885779836,
+      "E_peg_steric": 3.3550503583141715,
+      "total_F_multi": 5.848857457353102
+    },
+    {
+      "theta_deg": 120.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 1.0717967697244912,
+      "E_chol_bending": 0.4444444444444444,
+      "E_dspc_bridge": -1.7320508075688772,
+      "E_peg_steric": 3.7499999999999996,
+      "total_F_multi": 5.6145796769239675
+    },
+    {
+      "theta_deg": 130.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.7495377037068005,
+      "E_chol_bending": 0.308641975308642,
+      "E_dspc_bridge": -1.8126155740732999,
+      "E_peg_steric": 4.106969024216348,
+      "total_F_multi": 5.4329223994824005
+    },
+    {
+      "theta_deg": 140.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.48245903371273346,
+      "E_chol_bending": 0.19753086419753085,
+      "E_dspc_bridge": -1.8793852415718166,
+      "E_peg_steric": 4.415111107797444,
+      "total_F_multi": 5.296105034459802
+    },
+    {
+      "theta_deg": 150.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.2725933896874535,
+      "E_chol_bending": 0.1111111111111111,
+      "E_dspc_bridge": -1.9318516525781366,
+      "E_peg_steric": 4.665063509461097,
+      "total_F_multi": 5.197305628005435
+    },
+    {
+      "theta_deg": 160.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.12153797590233584,
+      "E_chol_bending": 0.04938271604938271,
+      "E_dspc_bridge": -1.969615506024416,
+      "E_peg_steric": 4.84923155196477,
+      "total_F_multi": 5.130926008215982
+    },
+    {
+      "theta_deg": 170.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.03044241526603564,
+      "E_chol_bending": 0.012345679012345678,
+      "E_dspc_bridge": -1.992389396183491,
+      "E_peg_steric": 4.962019382530521,
+      "total_F_multi": 5.092807350949321
+    },
+    {
+      "theta_deg": 180.0,
+      "fiedler_l2": 0.12488159003860974,
+      "E_ion_repulsion": 0.0,
+      "E_chol_bending": 0.0,
+      "E_dspc_bridge": -2.0,
+      "E_peg_steric": 5.0,
+      "total_F_multi": 5.080389270323909
+    }
+  ],
+  "min_angle_pH74": 70.0,
+  "min_angle_pH55": 180.0
+}

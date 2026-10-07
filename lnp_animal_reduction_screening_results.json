@@ -1,0 +1,68 @@
+{
+  "virtual_screening_summary": {
+    "total_screened": 100,
+    "animals_saved_pct": 71,
+    "top_5_recommended": [
+      {
+        "id": 86,
+        "formulation": {
+          "ionizable": 32.9,
+          "helper": 5.5,
+          "cholesterol": 26.6,
+          "peg": 2.6
+        },
+        "pKa_measured": 6.32,
+        "lepi_score": 82.9,
+        "phase_capable": true
+      },
+      {
+        "id": 95,
+        "formulation": {
+          "ionizable": 38.5,
+          "helper": 14.4,
+          "cholesterol": 41.5,
+          "peg": 1.9
+        },
+        "pKa_measured": 6.63,
+        "lepi_score": 74.7,
+        "phase_capable": true
+      },
+      {
+        "id": 88,
+        "formulation": {
+          "ionizable": 54.3,
+          "helper": 13.1,
+          "cholesterol": 40.6,
+          "peg": 5.2
+        },
+        "pKa_measured": 6.29,
+        "lepi_score": 71.2,
+        "phase_capable": true
+      },
+      {
+        "id": 49,
+        "formulation": {
+          "ionizable": 50.3,
+          "helper": 13.3,
+          "cholesterol": 42.1,
+          "peg": 4.8
+        },
+        "pKa_measured": 6.57,
+        "lepi_score": 70.1,
+        "phase_capable": true
+      },
+      {
+        "id": 31,
+        "formulation": {
+          "ionizable": 61.2,
+          "helper": 10.8,
+          "cholesterol": 49.3,
+          "peg": 1.4
+        },
+        "pKa_measured": 6.86,
+        "lepi_score": 65.4,
+        "phase_capable": true
+      }
+    ]
+  }
+}

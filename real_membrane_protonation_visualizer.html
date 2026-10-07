@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D脂質二分子膜構造＆極性基束縛水プロトン化相転移モデル | Real Lipid Bilayer & Bound Water Model</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg-dark: #060911;
+            --panel-bg: rgba(12, 20, 36, 0.92);
+            --accent-cyan: #00f0ff;
+            --accent-pink: #ff2a85;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --text-light: #f8fafc;
+            --text-dim: #94a3b8;
+            --border-glow: rgba(0, 240, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .ui-panel {
+            position: absolute;
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 16px 20px;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+        }
+
+        #header-panel {
+            top: 15px;
+            left: 15px;
+            max-width: 540px;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            line-height: 1.45;
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent-cyan);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            margin-bottom: 6px;
+        }
+
+        #timeline-panel {
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(880px, 94vw);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .step-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        button.step-btn {
+            background: rgba(20, 30, 50, 0.8);
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 9px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.76rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        button.step-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        button.step-btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            font-weight: 700;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+        }
+
+        .step-description-box {
+            background: rgba(8, 14, 26, 0.88);
+            border-radius: 8px;
+            padding: 10px 14px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.82rem;
+            line-height: 1.42;
+            color: var(--text-light);
+        }
+
+        #details-panel {
+            top: 15px;
+            right: 15px;
+            width: 350px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .stat-box {
+            background: rgba(20, 30, 50, 0.5);
+            padding: 6px 8px;
+            border-radius: 6px;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.74rem;
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.head { background: #3b82f6; }
+        .dot.proton { background: var(--accent-pink); box-shadow: 0 0 8px var(--accent-pink); }
+        .dot.boundwater { background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan); }
+        .dot.tail { background: #64748b; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="header-panel" class="ui-panel">
+        <div class="badge">本多氏の界面化学的真髄モデル</div>
+        <h1>3D脂質二分子膜構造＆極性基束縛水モデル</h1>
+        <div class="subtitle">
+            空中浮遊する孤立分子ではなく、極性頭部に水素結合した「束縛水（界面水）」を伴う実体的な平面二分子膜（Step 1）から、表面プロトン化（Step 2）、膜曲率の湾曲（Step 3）、貫通水チャネル構造（Step 4）への動的相転移を完全可視化
+        </div>
+    </div>
+
+    <div id="timeline-panel" class="ui-panel">
+        <div class="step-buttons">
+            <button id="btn-s1" class="step-btn active" onclick="setStep(1)">Step 1<br>平面二分子膜＆極性基束縛水 (pH 7.4)</button>
+            <button id="btn-s2" class="step-btn" onclick="setStep(2)">Step 2<br>膜表面アミン (N+H+) プロトン化</button>
+            <button id="btn-s3" class="step-btn" onclick="setStep(3)">Step 3<br>頭部拡張＆膜曲率の湾曲</button>
+            <button id="btn-s4" class="step-btn" onclick="setStep(4)">Step 4<br>筒状逆ヘキサゴナル相 (H_II)</button>
+        </div>
+        <div class="step-description-box" id="step-desc">
+            【Step 1: 平面二分子膜＆極性基束縛水 (pH 7.4)】実体的な3D平面脂質二分子膜構造。水分子 (H₂O) は遠くに浮遊するのではなく、膜表面の極性頭部 (N:, PO₄⁻) に直接水素結合（束縛水）した安定なラメラ膜状態。
+        </div>
+    </div>
+
+    <div id="details-panel" class="ui-panel">
+        <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim);">膜構造トポロジー状態</div>
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">充填パラメータ P</div>
+                <div class="stat-val" id="val-p">0.95</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">極性基束縛水数</div>
+                <div class="stat-val" id="val-bwater">24 分子</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">Fiedler接続度 λ2</div>
+                <div class="stat-val" id="val-l2">0.3035</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">膜構造形態</div>
+                <div class="stat-val" id="val-phase" style="font-size:0.85rem; color:var(--accent-green);">Planar Bilayer</div>
+            </div>
+        </div>
+
+        <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim); margin-top:12px;">膜構造構成要素</div>
+        <div class="legend-grid">
+            <div class="legend-item"><div class="dot head"></div>脂質極性頭部 (N/P/O)</div>
+            <div class="legend-item"><div class="dot proton"></div>膜表面プロトン (H+)</div>
+            <div class="legend-item"><div class="dot boundwater"></div>極性基直接結合水 (束縛水)</div>
+            <div class="legend-item"><div class="dot tail"></div>疎水性アルキル炭素尾部</div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let realMembraneGroup;
+        let currentStep = 1;
+
+        const STEP_DETAILS = {
+            1: {
+                desc: "【Step 1: 平面二分子膜＆極性基束縛水 (pH 7.4)】実体的な3D平面脂質二分子膜構造。水分子 (H₂O) は遠くに浮遊するのではなく、膜表面の極性頭部 (N:, PO₄⁻) に直接水素結合（束縛水）した安定なラメラ膜状態。",
+                p: "0.95", bwater: "24 分子", l2: "0.3035", phase: "Planar Bilayer (L_α)", color: "#10b981"
+            },
+            2: {
+                desc: "【Step 2: 膜表面アミン (N+H+) プロトン化】環境酸性化。膜表面の三級アミン N 原子にプロトン H+ が結合し、二分子膜の表面全体に陽電荷 (+) が発生！",
+                p: "1.17", bwater: "24 分子", l2: "0.3002", phase: "Protonated Bilayer", color: "#f59e0b"
+            },
+            3: {
+                desc: "【Step 3: 頭部拡張＆膜曲率の湾曲】陽電荷反発により極性頭部間隔が拡張。頭部に結合した束縛水が周囲の水を引き込みながら、膜構造全体がコーン型へと湾曲を始める！",
+                p: "1.39", bwater: "24 分子", l2: "0.3002", phase: "Bending Membrane", color: "#3b82f6"
+            },
+            4: {
+                desc: "【Step 4: 筒状逆ヘキサゴナル相 (H_II)】平面膜がまるまって筒状チャネルを形成！極性頭部に拘束されていた水分子がZ軸中心に一直線に整列し、連通した貫通水チャネルが完成！",
+                p: "1.61", bwater: "24 分子", l2: "0.3002", phase: "Inverted Hex (H_II)", color: "#00f0ff"
+            }
+        };
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x060911, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(24, 18, 30);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const d1 = new THREE.DirectionalLight(0x00f0ff, 0.8);
+            d1.position.set(15, 25, 15);
+            scene.add(d1);
+            const d2 = new THREE.DirectionalLight(0xff2a85, 0.5);
+            d2.position.set(-15, -15, -15);
+            scene.add(d2);
+
+            buildRealMembrane();
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function setStep(step) {
+            currentStep = step;
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`btn-s${i}`).classList.toggle('active', i === step);
+            }
+
+            const info = STEP_DETAILS[step];
+            document.getElementById('step-desc').innerText = info.desc;
+            document.getElementById('val-p').innerText = info.p;
+            document.getElementById('val-bwater').innerText = info.bwater;
+            document.getElementById('val-l2').innerText = info.l2;
+            document.getElementById('val-phase').innerText = info.phase;
+            document.getElementById('val-phase').style.color = info.color;
+
+            buildRealMembrane();
+        }
+
+        function buildRealMembrane() {
+            if (realMembraneGroup) scene.remove(realMembraneGroup);
+            realMembraneGroup = new THREE.Group();
+
+            const isProtonated = currentStep >= 2;
+            const progress = (currentStep - 1) / 3.0;
+
+            const nxGrid = 6;
+            const nyGrid = 4;
+
+            // Materials
+            const headMat = new THREE.MeshStandardMaterial({ color: isProtonated ? 0xff2a85 : 0x3b82f6, emissive: isProtonated ? 0x880033 : 0x001144 });
+            const protonMat = new THREE.MeshStandardMaterial({ color: 0xff0055, emissive: 0xff0055, emissiveIntensity: 1.0 });
+            const tailMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 });
+            const oWaterMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x004466, roughness: 0.2 });
+            const hWaterMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+            const bondMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, linewidth: 2 });
+            const hBondMat = new THREE.LineDashedMaterial({ color: 0x00f0ff, dashSize: 0.3, gapSize: 0.2, linewidth: 2 });
+
+            for (let ix = 0; ix < nxGrid; ix++) {
+                for (let iy = 0; iy < nyGrid; iy++) {
+                    let x, y, zHead;
+                    if (currentStep <= 2) {
+                        // Step 1 & 2: Real Planar Bilayer Sheet in 3D Space
+                        x = (ix - (nxGrid - 1) / 2.0) * 4.2;
+                        y = (iy - (nyGrid - 1) / 2.0) * 4.2;
+                        zHead = 3.8;
+                    } else {
+                        // Step 3 & 4: Curving into Cylindrical Channel
+                        const angle = (ix / nxGrid) * Math.PI * 2;
+                        const rCyl = 5.0 + 2.0 * progress;
+                        x = rCyl * Math.cos(angle);
+                        y = rCyl * Math.sin(angle);
+                        zHead = (iy - (nyGrid - 1) / 2.0) * 4.8;
+                    }
+
+                    const headPos = new THREE.Vector3(x, y, zHead);
+
+                    // Polar Head Sphere
+                    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), headMat);
+                    headMesh.position.copy(headPos);
+                    realMembraneGroup.add(headMesh);
+
+                    // Attached Proton if step >= 2
+                    if (isProtonated) {
+                        const pPos = new THREE.Vector3(x + 0.8, y + 0.5, zHead + 0.6);
+                        const pMesh = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), protonMat);
+                        pMesh.position.copy(pPos);
+                        realMembraneGroup.add(pMesh);
+                        realMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([headPos, pPos]), bondMat));
+                    }
+
+                    // Hydrophobic Tails extending inward
+                    const tailDir = currentStep <= 2 ? -1.0 : -0.8;
+                    let prevPos = headPos.clone();
+                    for (let c = 1; c <= 4; c++) {
+                        const cz = zHead + tailDir * c * 1.4;
+                        const cPos = new THREE.Vector3(x, y, cz);
+                        const cMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), tailMat);
+                        cMesh.position.copy(cPos);
+                        realMembraneGroup.add(cMesh);
+                        realMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([prevPos, cPos]), bondMat));
+                        prevPos = cPos;
+                    }
+
+                    // Bound Water Molecule Hydrogen-Bonded directly to Polar Head!
+                    let wPos;
+                    if (currentStep <= 2) {
+                        // Bound water sits right on top of polar head
+                        wPos = new THREE.Vector3(x, y, zHead + 1.8);
+                    } else {
+                        // Pulled inside the channel core
+                        wPos = new THREE.Vector3(x * 0.2, y * 0.2, zHead);
+                    }
+
+                    const oMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 12), oWaterMat);
+                    oMesh.position.copy(wPos);
+                    realMembraneGroup.add(oMesh);
+
+                    const h1Pos = new THREE.Vector3(wPos.x + 0.7, wPos.y + 0.4, wPos.z + 0.2);
+                    const h2Pos = new THREE.Vector3(wPos.x - 0.7, wPos.y + 0.4, wPos.z - 0.2);
+
+                    const h1Mesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 10), hWaterMat);
+                    h1Mesh.position.copy(h1Pos);
+                    realMembraneGroup.add(h1Mesh);
+
+                    const h2Mesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 10), hWaterMat);
+                    h2Mesh.position.copy(h2Pos);
+                    realMembraneGroup.add(h2Mesh);
+
+                    realMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([wPos, h1Pos]), bondMat));
+                    realMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([wPos, h2Pos]), bondMat));
+
+                    // Direct H-Bond line from Polar Head to Bound Water
+                    const hBondGeom = new THREE.BufferGeometry().setFromPoints([headPos, wPos]);
+                    const hBondLine = new THREE.Line(hBondGeom, hBondMat);
+                    hBondLine.computeLineDistances();
+                    realMembraneGroup.add(hBondLine);
+                }
+            }
+
+            scene.add(realMembraneGroup);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (realMembraneGroup) {
+                realMembraneGroup.rotation.y += 0.003;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

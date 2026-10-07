@@ -1,0 +1,294 @@
+{
+  "angles": [
+    0.0,
+    10.0,
+    20.0,
+    30.0,
+    40.0,
+    50.0,
+    60.0,
+    70.0,
+    80.0,
+    90.0,
+    100.0,
+    110.0,
+    120.0,
+    130.0,
+    140.0,
+    150.0,
+    160.0,
+    170.0,
+    180.0
+  ],
+  "curve_pH74": [
+    {
+      "theta_deg": 0.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 10.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 20.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 30.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 40.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 50.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 60.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 70.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 80.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 90.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 1.6921543197487308
+    },
+    {
+      "theta_deg": 100.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 110.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 120.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 130.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 140.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 150.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 160.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 170.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    },
+    {
+      "theta_deg": 180.0,
+      "protonated_ratio": 0.0,
+      "fiedler_l2": 0.023674102156910928,
+      "spectral_gap": 0.059755374381835744,
+      "free_energy_F": 3.743331324949466
+    }
+  ],
+  "curve_pH55": [
+    {
+      "theta_deg": 0.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18412143781729606,
+      "spectral_gap": 0.06065556809020303,
+      "free_energy_F": 9.692154319748731
+    },
+    {
+      "theta_deg": 10.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18474927843101638,
+      "spectral_gap": 0.06084021847939164,
+      "free_energy_F": 8.991504270104596
+    },
+    {
+      "theta_deg": 20.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18532322806799298,
+      "spectral_gap": 0.061005386412954776,
+      "free_energy_F": 8.296462982400632
+    },
+    {
+      "theta_deg": 30.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18584991450356148,
+      "spectral_gap": 0.061153893649186775,
+      "free_energy_F": 7.6122581007767325
+    },
+    {
+      "theta_deg": 40.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.1863349251897687,
+      "spectral_gap": 0.061288055664242086,
+      "free_energy_F": 6.944043038202449
+    },
+    {
+      "theta_deg": 50.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18678300301287099,
+      "spectral_gap": 0.061409788165270124,
+      "free_energy_F": 6.29685629990492
+    },
+    {
+      "theta_deg": 60.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18719819958453818,
+      "spectral_gap": 0.06152068821082593,
+      "free_energy_F": 5.675581990671407
+    },
+    {
+      "theta_deg": 70.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18758399640882784,
+      "spectral_gap": 0.06162209664046184,
+      "free_energy_F": 5.084911731298721
+    },
+    {
+      "theta_deg": 80.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18794340149281624,
+      "spectral_gap": 0.06171514659010219,
+      "free_energy_F": 4.529308219138946
+    },
+    {
+      "theta_deg": 90.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.18827902700311808,
+      "spectral_gap": 0.06180080153833187,
+      "free_energy_F": 4.0129706695368235
+    },
+    {
+      "theta_deg": 100.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.03432150440553633,
+      "spectral_gap": 0.08209414594155696,
+      "free_energy_F": 5.243598489883605
+    },
+    {
+      "theta_deg": 110.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.035369910516837445,
+      "spectral_gap": 0.08421812732385603,
+      "free_energy_F": 4.788649179153744
+    },
+    {
+      "theta_deg": 120.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.03641560462267618,
+      "spectral_gap": 0.08632525346110999,
+      "free_energy_F": 4.384527207125629
+    },
+    {
+      "theta_deg": 130.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.03745864361780103,
+      "spectral_gap": 0.0884161349822258,
+      "free_energy_F": 4.034028799391474
+    },
+    {
+      "theta_deg": 140.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.038499082438805725,
+      "spectral_gap": 0.09049134193827396,
+      "free_energy_F": 3.7395539301357434
+    },
+    {
+      "theta_deg": 150.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.03953697416895049,
+      "spectral_gap": 0.09255140701580236,
+      "free_energy_F": 3.5030870872181663
+    },
+    {
+      "theta_deg": 160.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.04057237013483934,
+      "spectral_gap": 0.09459682843800887,
+      "free_energy_F": 3.326181311487434
+    },
+    {
+      "theta_deg": 170.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.04160531999584369,
+      "spectral_gap": 0.09662807258946335,
+      "free_energy_F": 3.20994561554307
+    },
+    {
+      "theta_deg": 180.0,
+      "protonated_ratio": 1.0,
+      "fiedler_l2": 0.04263587182686443,
+      "spectral_gap": 0.09864557639551638,
+      "free_energy_F": 3.1550358642250718
+    }
+  ],
+  "proof_conclusion": "Protonation causes deterministic energy shift from θ=0.0° to θ=180.0°, proving 'なるべくしてこうなる'."
+}

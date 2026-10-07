@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4成分LNP二分子膜プロトン化＆連続相転移リアルタイム3Dシミュレータ | Continuous LNP Membrane Morphing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg-dark: #050811;
+            --panel-bg: rgba(12, 20, 36, 0.92);
+            --accent-cyan: #00f0ff;
+            --accent-pink: #ff2a85;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-purple: #a855f7;
+            --text-light: #f8fafc;
+            --text-dim: #94a3b8;
+            --border-glow: rgba(0, 240, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .ui-panel {
+            position: absolute;
+            background: var(--panel-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 16px 20px;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+        }
+
+        #header-panel {
+            top: 15px;
+            left: 15px;
+            max-width: 540px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            line-height: 1.45;
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--accent-cyan);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            margin-bottom: 6px;
+        }
+
+        #timeline-panel {
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(880px, 94vw);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            background: rgba(20, 30, 50, 0.8);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan);
+        }
+
+        .btn-play {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .btn-play:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+        }
+
+        .step-description-box {
+            background: rgba(8, 14, 26, 0.88);
+            border-radius: 8px;
+            padding: 10px 14px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.82rem;
+            line-height: 1.42;
+            color: var(--text-light);
+        }
+
+        #details-panel {
+            top: 15px;
+            right: 15px;
+            width: 360px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .stat-box {
+            background: rgba(20, 30, 50, 0.5);
+            padding: 6px 8px;
+            border-radius: 6px;
+        }
+
+        .stat-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 0.74rem;
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.ion { background: var(--accent-pink); box-shadow: 0 0 6px var(--accent-pink); }
+        .dot.dspc { background: var(--accent-green); }
+        .dot.chol { background: var(--accent-amber); }
+        .dot.peg { background: var(--accent-purple); }
+        .dot.water { background: var(--accent-cyan); box-shadow: 0 0 6px var(--accent-cyan); }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="header-panel" class="ui-panel">
+        <div class="badge">本多氏のご指導：連続リアルタイム構造変化モデル</div>
+        <h1>4成分LNP膜 連続プロトン化＆相転移3D</h1>
+        <div class="subtitle">
+            離散的なコマ送りではなく、pH降下に伴う三級アミンの段階的プロトン化（N → NH+）、静電反発による頭部拡張、コレステロールのインターカレーション、二分子膜の連続湾曲、および極性頭部束縛水の1D貫通チャネル内への連続流動プロセスをリアルタイム可視化
+        </div>
+    </div>
+
+    <div id="timeline-panel" class="ui-panel">
+        <div class="control-row">
+            <button id="btn-play" class="btn-play" onclick="togglePlayAnimation()">▶ プロトン化相転移アニメーション開始</button>
+            <label>プロトン化進行度 (<span id="val-ratio">0%</span> | <span id="val-ph">pH 7.4</span>)</label>
+            <input type="range" id="slider-ratio" min="0" max="100" value="0" oninput="onRatioSliderChange()">
+        </div>
+        <div class="step-description-box" id="step-desc">
+            【中性状態 pH 7.4 (プロトン化 0%)】実体的な3D平面脂質二分子膜構造。三級アミン N 原子は非プロトン化。束縛水 (H₂O) は極性頭部に直接水素結合し、平面膜は安定な二分子膜形態（ラメラ相 L_α）を保持。
+        </div>
+    </div>
+
+    <div id="details-panel" class="ui-panel">
+        <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim);">4成分関与＆相構造リアルタイム指標</div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">充填パラメータ P</div>
+                <div class="stat-val" id="val-p">0.95</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">プロトン化 NH+ 率</div>
+                <div class="stat-val" id="val-nh">0 %</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">膜の湾曲角度 θ</div>
+                <div class="stat-val" id="val-theta">0.0 °</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-title" style="font-size:0.7rem; color:var(--text-dim);">相構造形態</div>
+                <div class="stat-val" id="val-phase" style="font-size:0.85rem; color:var(--accent-green);">Planar Bilayer</div>
+            </div>
+        </div>
+
+        <div class="stat-title" style="font-size:0.72rem; color:var(--text-dim); margin-top:10px;">4成分脂質分子の関与と役割</div>
+        <div class="legend-grid">
+            <div class="legend-item"><div class="dot ion"></div>イオン化脂質: プロトン化反発</div>
+            <div class="legend-item"><div class="dot chol"></div>コレステロール: 尾部開出＆湾曲</div>
+            <div class="legend-item"><div class="dot dspc"></div>Helper脂質 (DSPC): 水素結合橋</div>
+            <div class="legend-item"><div class="dot peg"></div>PEG脂質: 外層立体シールド</div>
+            <div class="legend-item" style="grid-column: span 2;"><div class="dot water"></div>極性頭部束縛水 → 1D貫通水ワイヤーへ流動</div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let continuousMembraneGroup;
+        let isPlaying = false;
+        let currentRatio = 0.0;
+        let animationFrameId = null;
+
+        const lipidTypes = ["ION", "CHOL", "ION", "DSPC", "ION", "CHOL", "ION", "PEG", "ION", "CHOL", "ION", "DSPC"];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x050811, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(24, 18, 30);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lights
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const d1 = new THREE.DirectionalLight(0x00f0ff, 0.8);
+            d1.position.set(15, 25, 15);
+            scene.add(d1);
+            const d2 = new THREE.DirectionalLight(0xff2a85, 0.5);
+            d2.position.set(-15, -15, -15);
+            scene.add(d2);
+
+            buildContinuousMembrane(0.0);
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function togglePlayAnimation() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('btn-play');
+            if (isPlaying) {
+                btn.innerText = "⏸ プロトン化相転移アニメーション一時停止";
+                btn.style.background = "rgba(255, 42, 133, 0.3)";
+                btn.style.borderColor = "#ff2a85";
+                btn.style.color = "#ff2a85";
+                playLoop();
+            } else {
+                btn.innerText = "▶ プロトン化相転移アニメーション開始";
+                btn.style.background = "rgba(0, 240, 255, 0.2)";
+                btn.style.borderColor = "#00f0ff";
+                btn.style.color = "#00f0ff";
+            }
+        }
+
+        function playLoop() {
+            if (!isPlaying) return;
+            currentRatio += 0.005;
+            if (currentRatio > 1.0) currentRatio = 0.0;
+            document.getElementById('slider-ratio').value = Math.round(currentRatio * 100);
+            updateVisualsFromRatio(currentRatio);
+            requestAnimationFrame(playLoop);
+        }
+
+        function onRatioSliderChange() {
+            if (isPlaying) togglePlayAnimation();
+            const val = parseFloat(document.getElementById('slider-ratio').value) / 100.0;
+            currentRatio = val;
+            updateVisualsFromRatio(currentRatio);
+        }
+
+        function updateVisualsFromRatio(ratio) {
+            const ph = (7.4 - ratio * 2.4).toFixed(1);
+            document.getElementById('val-ratio').innerText = Math.round(ratio * 100) + '%';
+            document.getElementById('val-ph').innerText = 'pH ' + ph;
+
+            const curveFactor = Math.sin(ratio * Math.PI / 2.0);
+            const P = (0.95 + 0.66 * curveFactor).toFixed(2);
+            const theta = (curveFactor * 180.0).toFixed(1);
+
+            let phase = "Planar Bilayer (L_α)";
+            let color = "#10b981";
+            let desc = "【中性状態 pH 7.4】平面脂質二分子膜構造。束縛水 (H₂O) は頭部に結合し、平坦な二分子膜形態（ラメラ相）を保持。";
+
+            if (ratio > 0.1 && ratio <= 0.4) {
+                phase = "Protonation (N → NH+)";
+                color = "#f59e0b";
+                desc = "【プロトン化進行】酸性化により膜表面の三級アミン N にプロトン H+ が連続的に結合！ NH+ 陽電荷の発生と極性頭部間の静電反発が開始。";
+            } else if (ratio > 0.4 && ratio <= 0.75) {
+                phase = "Membrane Bending";
+                color = "#3b82f6";
+                desc = "【膜の連続的湾曲】頭部反発により二分子膜がぐにゃりと湾曲！コレステロールが尾部間に割り込んでコーン型変形を安定化し、束縛水が内部へ流入し始める。";
+            } else if (ratio > 0.75) {
+                phase = "Inverted Hex (H_II)";
+                color = "#00f0ff";
+                desc = "【筒状逆ヘキサゴナル相完成】二分子膜が円筒状に丸まり、貫通水チャネルが完成！極性頭部にいた束縛水がZ軸中心に一直線に整列し、連通した1D水ワイヤーを形成！";
+            }
+
+            document.getElementById('val-p').innerText = P;
+            document.getElementById('val-nh').innerText = Math.round(ratio * 100) + ' %';
+            document.getElementById('val-theta').innerText = theta + ' °';
+            document.getElementById('val-phase').innerText = phase;
+            document.getElementById('val-phase').style.color = color;
+            document.getElementById('step-desc').innerText = desc;
+
+            buildContinuousMembrane(ratio);
+        }
+
+        function buildContinuousMembrane(ratio) {
+            if (continuousMembraneGroup) scene.remove(continuousMembraneGroup);
+            continuousMembraneGroup = new THREE.Group();
+
+            const curveFactor = Math.sin(ratio * Math.PI / 2.0);
+            const nxGrid = lipidTypes.length;
+            const nyGrid = 4;
+
+            const headExpansion = 3.8 + 2.4 * curveFactor;
+            const tailSplay = 0.1 + 0.6 * curveFactor;
+
+            // Materials
+            const ionNeutralMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.3 });
+            const ionProtonatedMat = new THREE.MeshStandardMaterial({ color: 0xff2a85, emissive: 0x880033, roughness: 0.2 });
+            const protonMat = new THREE.MeshStandardMaterial({ color: 0xff0055, emissive: 0xff0055, emissiveIntensity: 1.0 });
+            const dspcMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.3 });
+            const cholMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
+            const pegMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.3 });
+            const tailMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 });
+            const oWaterMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, emissive: 0x004466, roughness: 0.2 });
+            const hWaterMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+            const bondMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, linewidth: 2 });
+            const hBondMat = new THREE.LineDashedMaterial({ color: 0x00f0ff, dashSize: 0.3, gapSize: 0.2, linewidth: 2 });
+
+            const waterPositions = [];
+
+            for (let ix = 0; ix < nxGrid; ix++) {
+                const ltype = lipidTypes[ix];
+                for (let iy = 0; iy < nyGrid; iy++) {
+                    const isIon = (ltype === "ION");
+                    const isProtonated = isIon && (ix / nxGrid <= ratio || ratio > 0.85);
+
+                    // Continuous Position Morphing
+                    let x, y, zHead;
+                    if (curveFactor < 0.05) {
+                        x = (ix - (nxGrid - 1) / 2.0) * headExpansion;
+                        y = (iy - (nyGrid - 1) / 2.0) * headExpansion;
+                        zHead = 4.0;
+                    } else {
+                        const angle = (ix / nxGrid) * Math.PI * 2.0;
+                        const rCyl = 5.5 + 2.5 * (1.0 - curveFactor);
+                        x = (1.0 - curveFactor) * ((ix - (nxGrid - 1) / 2.0) * headExpansion) + curveFactor * (rCyl * Math.cos(angle));
+                        y = (1.0 - curveFactor) * ((iy - (nyGrid - 1) / 2.0) * headExpansion) + curveFactor * (rCyl * Math.sin(angle));
+                        zHead = 4.0 * (1.0 - curveFactor) + (iy - (nyGrid - 1) / 2.0) * 4.5 * curveFactor;
+                    }
+
+                    const headPos = new THREE.Vector3(x, y, zHead);
+
+                    // Polar Head Mesh according to Lipid Type
+                    let mat = ionNeutralMat;
+                    if (isIon) mat = isProtonated ? ionProtonatedMat : ionNeutralMat;
+                    else if (ltype === "DSPC") mat = dspcMat;
+                    else if (ltype === "CHOL") mat = cholMat;
+                    else if (ltype === "PEG") mat = pegMat;
+
+                    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), mat);
+                    headMesh.position.copy(headPos);
+                    continuousMembraneGroup.add(headMesh);
+
+                    // Proton attachment
+                    if (isProtonated) {
+                        const pPos = new THREE.Vector3(x + 0.8, y + 0.5, zHead + 0.6);
+                        const pMesh = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), protonMat);
+                        pMesh.position.copy(pPos);
+                        continuousMembraneGroup.add(pMesh);
+                        continuousMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([headPos, pPos]), bondMat));
+                    }
+
+                    // Component Tails & Hydrophobic Splaying
+                    if (ltype === "CHOL") {
+                        let prevPos = headPos.clone();
+                        for (let r = 1; r <= 3; r++) {
+                            const cPos = new THREE.Vector3(x, y, zHead - r * 1.2);
+                            const cMesh = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), cholMat);
+                            cMesh.position.copy(cPos);
+                            continuousMembraneGroup.add(cMesh);
+                            continuousMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([prevPos, cPos]), bondMat));
+                            prevPos = cPos;
+                        }
+                    } else if (ltype === "PEG") {
+                        let prevPos = headPos.clone();
+                        for (let p = 1; p <= 4; p++) {
+                            const pPos = new THREE.Vector3(x, y, zHead + p * 1.3);
+                            const pMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), pegMat);
+                            pMesh.position.copy(pPos);
+                            continuousMembraneGroup.add(pMesh);
+                            continuousMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([prevPos, pPos]), bondMat));
+                            prevPos = pPos;
+                        }
+                    } else {
+                        // ION & DSPC Dual Tails
+                        for (let branch of [-1, 1]) {
+                            let prevPos = headPos.clone();
+                            for (let c = 1; c <= 4; c++) {
+                                const cz = zHead - c * 1.3;
+                                const cx = x + c * 0.4 * branch * tailSplay;
+                                const cPos = new THREE.Vector3(cx, y, cz);
+                                const cMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), tailMat);
+                                cMesh.position.copy(cPos);
+                                continuousMembraneGroup.add(cMesh);
+                                continuousMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([prevPos, cPos]), bondMat));
+                                prevPos = cPos;
+                            }
+                        }
+                    }
+
+                    // Bound Water Flow: Sucked from Polar Head into Inner Cylinder Channel
+                    const wx = (1.0 - curveFactor) * x + curveFactor * (x * 0.25);
+                    const wy = (1.0 - curveFactor) * y + curveFactor * (y * 0.25);
+                    const wz = zHead + (1.8 * (1.0 - curveFactor));
+                    const wPos = new THREE.Vector3(wx, wy, wz);
+                    waterPositions.push(wPos);
+
+                    const oMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 12), oWaterMat);
+                    oMesh.position.copy(wPos);
+                    continuousMembraneGroup.add(oMesh);
+
+                    const h1Pos = new THREE.Vector3(wx + 0.7, wy + 0.4, wz + 0.2);
+                    const h2Pos = new THREE.Vector3(wx - 0.7, wy + 0.4, wz - 0.2);
+
+                    const h1Mesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 10), hWaterMat);
+                    h1Mesh.position.copy(h1Pos);
+                    continuousMembraneGroup.add(h1Mesh);
+
+                    const h2Mesh = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 10), hWaterMat);
+                    h2Mesh.position.copy(h2Pos);
+                    continuousMembraneGroup.add(h2Mesh);
+
+                    continuousMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([wPos, h1Pos]), bondMat));
+                    continuousMembraneGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([wPos, h2Pos]), bondMat));
+
+                    // H-Bond from Polar Head to Bound Water
+                    const hBondGeom = new THREE.BufferGeometry().setFromPoints([headPos, wPos]);
+                    const hBondLine = new THREE.Line(hBondGeom, hBondMat);
+                    hBondLine.computeLineDistances();
+                    continuousMembraneGroup.add(hBondLine);
+                }
+            }
+
+            scene.add(continuousMembraneGroup);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (continuousMembraneGroup) {
+                continuousMembraneGroup.rotation.y += 0.003;
+            }
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
