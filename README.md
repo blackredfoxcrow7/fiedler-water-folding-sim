@@ -3,7 +3,7 @@
 **Graph-Spectral Topological Physics Framework for Protein Folding, Dynamic Water Graph Nodes, Colloid Science, and Lipid Nanoparticle (LNP) mRNA Drug Delivery Systems**
 
 *Concept & Theory by Yoshihiro Honda (本多 義弘 / Yoshi)*  
-*Independent Researcher in Computational & Organic Chemistry, Japan*
+*Independent Researcher in Organic Chemistry, Japan*
 
 ---
 
